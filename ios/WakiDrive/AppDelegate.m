@@ -6,6 +6,11 @@
  */
 #import <GoogleMaps/GoogleMaps.h>
 #import "AppDelegate.h"
+//added by firebase notification aarticle
+#import <Firebase.h>
+#import "RNFirebaseNotifications.h"
+#import "RNFirebaseMessaging.h"
+//added by firebase notification aarticle
 
 #import <React/RCTBridge.h>
 #import <React/RCTBundleURLProvider.h>
@@ -19,6 +24,9 @@
 {
   NSString *apiUrl = [ReactNativeConfig envFor:@"GOOGLE_KEY"];
     +  [GMSServices provideAPIKey:apiUrl];
+  [FIRApp configure];
+  [[UNUserNotificationCenter currentNotificationCenter] setDelegate:self];
+  [RNFirebaseNotifications configure];
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
                                                    moduleName:@"WakiDrive"

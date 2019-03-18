@@ -38,8 +38,8 @@ target 'WakiDrive' do
     pod 'GoogleMaps'  # Uncomment this line if you want to support GoogleMaps on iOS
     pod 'Google-Maps-iOS-Utils' # Uncomment this line if you want to support GoogleMaps on iOS
     pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
-    # pod 'Firebase/Core'
-    # pod 'Firebase/Messaging'
+    pod 'Firebase/Core'
+    pod 'Firebase/Messaging'
     pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
     pod 'react-native-async-storage', :path => '../node_modules/@react-native-community/async-storage'
 

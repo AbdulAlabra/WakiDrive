@@ -7,8 +7,8 @@ import { View, Dimensions } from "react-native"
 import { Marker } from 'react-native-maps';
 import isDrivingNow from '../components/DriverNow';
 import localStorage from '../components/localStorage'
-// import permission from '../components/notifications/permission';
-// import Notification from '../components/notifications/notification'
+import permission from '../components/notifications/permission';
+import Notification from '../components/notifications/notification'
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
 var LATITUDE_DELTA = 0.01;
@@ -77,7 +77,7 @@ class HomePage extends Component {
   }
 
   componentDidMount() {
-    // permission()
+    permission()
   }
   componentWillMount() {
     this.wasDriverReadyToDrive()
@@ -174,7 +174,7 @@ class HomePage extends Component {
             {StoreBuyerPolyLine(this.state.isOrderedPickedUp, this.state.driver, this.state.buyer)} */}
             {this.watchUserLocation()}
           </Map>
-          {/* <Notification /> */}
+          <Notification />
         </Container>
       </SideMenu>
 

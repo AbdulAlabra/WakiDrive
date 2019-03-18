@@ -23,7 +23,7 @@ const getToken = () => {
                     .then(FCMToken => {
                         console.log('from FCM');
                         console.log(FCMToken)
-                        localStorage.storeData("fcmToken", FCMToken)
+                        localStorage.storeData("@fcmToken", FCMToken)
                             .then(dataStored => {
                                 console.log('TOKEN is Stored successfully')
                                 saveToDataBase(dataStored);
