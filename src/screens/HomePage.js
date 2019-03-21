@@ -7,8 +7,10 @@ import { View, Dimensions } from "react-native"
 import { Marker } from 'react-native-maps';
 import isDrivingNow from '../components/DriverNow';
 import localStorage from '../components/localStorage'
-import permission from '../components/notifications/permission';
+import permission from '../components/notifications/helpers/permission';
 import Notification from '../components/notifications/notification'
+
+
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
 var LATITUDE_DELTA = 0.01;
@@ -21,6 +23,8 @@ class HomePage extends Component {
     header: null
   }
   state = {
+    cords: '',
+    coordinates: [],
     readyToDrive: true,
     newOrderRecived: false,
     isOrderedPickedUp: '',
@@ -47,7 +51,6 @@ class HomePage extends Component {
         }
       })
       .catch(err => console.log(err))
-
   }
   returnMarker() {
     if (this.state.newOrderRecived) {
@@ -153,6 +156,7 @@ class HomePage extends Component {
     }
   }
   render() {
+
     return (
       <SideMenu isOpen={this.state.isOpen}>
         <Container>
@@ -168,13 +172,8 @@ class HomePage extends Component {
             onPressLeft={() => this.setState({ isOpen: true })}
             onLongPressTitle={() => this.onLongPress()}
           />
-          <Map region={this.state.region}>
-            {/* {this.returnMarker()}
-            {DriverStorePolyLine(this.state.isOrderedPickedUp, this.state.driver, this.state.store)}
-            {StoreBuyerPolyLine(this.state.isOrderedPickedUp, this.state.driver, this.state.buyer)} */}
-            {this.watchUserLocation()}
-          </Map>
           <Notification />
+
         </Container>
       </SideMenu>
 

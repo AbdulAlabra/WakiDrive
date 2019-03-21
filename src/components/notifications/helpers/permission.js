@@ -1,6 +1,6 @@
-import localStorage from '../localStorage'
+import localStorage from '../../localStorage'
 import firebaseRN from 'react-native-firebase';
-import firebase from 'firebase';
+import firebase from '../../Firebase';
 
 const checkPermission = () => {
     const enabled = firebaseRN.messaging().hasPermission().then(res => {
@@ -16,8 +16,9 @@ const checkPermission = () => {
 
 //3
 const getToken = () => {
-    localStorage.retrieveData("fcmToken")
+    localStorage.retrieveData("@fcmToken")
         .then(response => {
+
             if (!response) {
                 let getFcmToken = firebaseRN.messaging().getToken()
                     .then(FCMToken => {
@@ -42,23 +43,25 @@ const getToken = () => {
             }
         })
         .catch(err => console.log(err))
-
 }
 
 //2
 const saveToDataBase = (token) => {
-    //setTimeOut Only For Testing..
-    // setTimeout(() => {
+    //problem with socet connection that's why we have this setTimeout
+    setTimeout(() => {
         const db = firebase.database();
         const driverID = firebase.auth().currentUser;
         console.log(driverID);
         if (driverID) {
-        db.ref(`drivers/registeredDrivers/${driverID.uid}/driverInfo`).update({
-            token: token
-        });
-    }
-    // }, 10000)
+            db.ref(`drivers/registeredDrivers/${driverID.uid}/driverInfo`).update({
+                token: token
+            })
+                .then(res => console.log('Success Update TOEKN To DB ')).catch(err => console.log(err));
+        }
+
+    }, 10000)
 }
+
 const requestPermission = () => {
     firebaseRN.messaging().requestPermission()
         .then(() => {

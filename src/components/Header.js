@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Header, Title, Button, Left, Right, Text } from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import LocationIcon from 'react-native-vector-icons/FontAwesome5';
+import LocationIcon from 'react-native-vector-icons/FontAwesome';
 
 
 class Header1 extends Component {

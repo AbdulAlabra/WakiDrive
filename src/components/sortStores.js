@@ -1,10 +1,7 @@
 import { distance } from "./Directions"
 
 var y = 0;
-const dictanceLink = async (DriverURL, stores) => {
-    y++
-    if (y === 3) {
-        
+const dictanceLink = async (DriverURL, stores) => {  
         let x = 0;
         let makeURL = stores.reduce((prevURL, nextURL) => {
             x++
@@ -16,15 +13,10 @@ const dictanceLink = async (DriverURL, stores) => {
             }
             return prevURL + thisStoreURL
         }, "");
-        // console.log(DriverURL);
-        // console.log(makeURL);
-        // console.log(stores);
+        console.log(DriverURL)
+        console.log(makeURL);
         
        return distance(DriverURL, makeURL)
-    }
-    else {
-        return false;
-    }
 }
 
 export default dictanceLink;

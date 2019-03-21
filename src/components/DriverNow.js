@@ -40,6 +40,7 @@ const CheckDriver = (status, done) => {
 const readyToDrive = (status) => {
     const currentDriver = firebase.auth().currentUser;
     const driverID = currentDriver.uid
+    console.log(driverID);
 
     if (status) {
         db.ref(`drivers/registeredDrivers/${driverID}`).once('value', function (data) {

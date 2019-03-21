@@ -1,8 +1,9 @@
 
 
-import  AsyncStorage  from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-community/async-storage';
 
 var CRUD = {
+
     removeData: async (keyName) => {
         try {
             const value = await AsyncStorage.removeItem(keyName)
@@ -12,6 +13,7 @@ var CRUD = {
 
         }
     },
+
     storeData: async (key, value) => {
 
         try {
@@ -26,19 +28,33 @@ var CRUD = {
             // Error saving data
         }
     },
+
     retrieveData: async (key) => {
         try {
-            
+
             const value = await AsyncStorage.getItem(key);
-            if(value !== null) {
-            const parsedValue = JSON.parse(value);
-            console.log('item is retrived')
-            return parsedValue;
+            if (value !== null) {
+                const parsedValue = JSON.parse(value);
+                console.log('item is retrived')
+                return parsedValue;
             }
         } catch (error) {
             // Error retrieving data
             console.log(error);
         }
+    },
+
+    getAllData: getAllKeys = async () => {
+        let keys = []
+        try {
+            keys = await AsyncStorage.getAllKeys()
+        } catch (e) {
+            // read key error
+        }
+        //console.log(keys)
+        return keys
+        // example console.log result:
+        // ['@MyApp_user', '@MyApp_key']
     }
 }
 

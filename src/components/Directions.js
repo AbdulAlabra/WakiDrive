@@ -38,7 +38,6 @@ export const distance = (origin, destination) => {
 // let destination = { latitude: 38.648002, longitude: -121.31038 }
 
 export const directions = (origin, destination) => {
-
     return fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=${APIkey}`)
         .then(res => {
             return res.json().then(result => {
