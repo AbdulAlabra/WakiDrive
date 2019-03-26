@@ -1,31 +1,56 @@
 import React, { Component } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { Container } from 'native-base';
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
-import { directions } from './Directions';
-import Notification from "./notifications/notification"
-import localStorage from './localStorage'
+
+
+const { width, height } = Dimensions.get('window');
+const ASPECT_RATIO = width / height;
+var LATITUDE_DELTA = 0.01;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+
 
 
 class Map extends Component {
-    // state = {
-    //     coordinates: []
+    state = {
+        region: null
+    }
+    // componentWillMount() {
+    //     this.watchUserLocation()
+    // }
+    // componentDidMount() {
+    //     this.setState({ region: null })
+
     // }
     componentDidUpdate() {
-        if (this.props.cords.length > 0) { 
+        if (this.props.cords.length > 0) {
 
             this.map.fitToCoordinates(this.props.cords, { edgePadding: { top: 80, right: 80, bottom: 80, left: 80 }, animated: true });
         }
 
     }
+    watchUserLocation() {
+        navigator.geolocation.getCurrentPosition(position => {
+            this.setState({
+                region: {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    latitudeDelta: LATITUDE_DELTA,
+                    longitudeDelta: LONGITUDE_DELTA
+                }
+            });
+        }, err => console.log(err));
+    }
+
 
     render() {
-
         let marker = null;
+        let polyline = null;
         if (this.props.cords.length > 0) {
             marker = <Marker coordinate={this.props.cords[this.props.cords.length - 1]} title='Store' />
-        }
+            polyline = <Polyline coordinates={this.props.cords} strokeWidth={5} strokeColor="green" />
 
+        }
 
         return (
             <Container>
@@ -33,6 +58,7 @@ class Map extends Component {
                     ref={map => {
                         this.map = map;
                     }}
+
                     style={styles.map}
                     provider={PROVIDER_GOOGLE}
                     initialRegion={{
@@ -41,25 +67,24 @@ class Map extends Component {
                         latitudeDelta: 0.1622,
                         longitudeDelta: 0.1421,
                     }}
-                    cords={this.props.cords}
                     showsTraffic={true}
                     showsUserLocation={true}
                     showsMyLocationButton={true}
                     scrollEnabled={true}
                     followsUserLocation={true}
-                    region={this.props.region}
+                    region={this.state.region}
                 >
                     {/* <Notification>
                     </Notification>  */}
-                    <Polyline
+                    {/* <Polyline
                         coordinates={this.props.cords}
                         strokeWidth={5}
                         strokeColor="green"
-
-                    />
+                    /> */}
+                    {polyline}
                     {marker}
                     {this.props.children}
-                    {/* {test()} */}
+                    {/* {this.watchUserLocation()} */}
 
                 </MapView>
             </Container>

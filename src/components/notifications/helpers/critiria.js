@@ -4,10 +4,10 @@ import moment from 'moment-timezone'
 
 
 const sortOrders = async () => {
-    return localStorage.retrieveData('@fcmToken')
-        .then(token => {
-            if (token) {
-                return firebase.database().ref(`orderListeners/${token}`).once('value', x => {
+    return localStorage.retrieveData('@driverID')
+        .then(driverID => {
+            if (driverID) {
+                return firebase.database().ref(`orderListeners/${driverID}`).once('value', x => {
                 }).then(snapshot => {
                     let orders = [];
                     snapshot.forEach(child => {
@@ -25,9 +25,7 @@ const sortOrders = async () => {
                     var bestOrders = orders.filter(order => {
                         return order.driverIndex === orders[0].driverIndex
                     });
-
                     bestOrders.sort((a, b) => a.timeDiff - b.timeDiff);
-
                     console.log(bestOrders);
                     return { orderRefrence: bestOrders[0].orderRefrence, orderID: bestOrders[0].orderID };
                 })

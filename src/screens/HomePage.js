@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Map from '../components/map'
 import { Container } from 'native-base';
 import Header from "../components/Header";
 import SideMenu from './Menu'
@@ -9,12 +8,12 @@ import isDrivingNow from '../components/DriverNow';
 import localStorage from '../components/localStorage'
 import permission from '../components/notifications/helpers/permission';
 import Notification from '../components/notifications/notification'
-
-
+import nextTrip from '../components/orders/nextDestination';
+import Alert from '../components/Alert'
+import isReadyToDrive from '../components/isReadyToDrive'
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
 var LATITUDE_DELTA = 0.01;
-
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 
@@ -30,13 +29,16 @@ class HomePage extends Component {
     isOrderedPickedUp: '',
     isOrderRecieved: false,
     title: 'WakiDrive',
-
+    nextTripAccepted: undefined,
+    delivered: false,
+    deliveredNum: 0,
     isOpen: false,
     rightIconColor: "#99ccff",
     region: null,
     buyer: "",
     store: "",
-    driver: null
+    driver: null,
+    checkOrder: false
   }
   wasDriverReadyToDrive() {
     localStorage.retrieveData('@isReadyToDrive')
@@ -44,9 +46,15 @@ class HomePage extends Component {
         if (res) {
           console.log('Was Driver Ready to drive ' + res)
           //this means the driver was on ReadyToDrive State
-          this.setState({ rightIconColor: '#58D68D', readyToDrive: false })
+          this.setState({ rightIconColor: '#58D68D', readyToDrive: res })
+          this.setState({ checkOrder: false })
+
         }
         else {
+          this.setState({
+            rightIconColor: '#E74C3C',
+            readyToDrive: res
+          });
           console.log('Was Driver Ready to drive ' + res)
         }
       })
@@ -78,18 +86,15 @@ class HomePage extends Component {
       return
     }
   }
-
   componentDidMount() {
     permission()
   }
   componentWillMount() {
     this.wasDriverReadyToDrive()
   }
-
   watchUserLocation() {
     navigator.geolocation.watchPosition(position => {
       this.setState({
-        isOpen: false,
         region: {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
@@ -102,38 +107,41 @@ class HomePage extends Component {
         }
       });
     }, err => console.log(err));
-
   }
-
   isReadyToDrive(x) {
     if (x) {
       this.setState({ rightIconColor: '#58D68D', isOpen: false });
-      isDrivingNow(x);
-
-      localStorage.storeData('@isReadyToDrive', this.state.readyToDrive)
-        .then(res => console.log('Is Driver Ready to drive ' + res))
-        .catch(err => console.log(err));
+      isReadyToDrive(x);
     }
     else {
-      localStorage.storeData('@isReadyToDrive', this.state.readyToDrive)
-        .then(res => console.log('Is Driver Ready to drive ' + res))
-        .catch(err => console.log(err));
       this.setState({
         rightIconColor: '#E74C3C',
         isOpen: false,
-        newOrderRecived: false,
-        isOrderedPickedUp: '',
-        isOrderRecieved: false
       });
-      isDrivingNow(x);
+      isReadyToDrive(x);
     }
   }
   isReadyToDrive2() {
+    this.setState({ isOpen: false })
 
     this.setState(prevState => ({
       readyToDrive: !prevState.readyToDrive
     }));
-    this.isReadyToDrive(this.state.readyToDrive);
+    localStorage.retrieveData('@isDrivingNow').then(res => {
+      if (res) {
+        Alert('You must deliver the items to turn it off', '', () => console.log('ok'), () => console.log('cancel'))
+      }
+      else {
+        this.isReadyToDrive(this.state.readyToDrive);
+        if (this.state.readyToDrive) {
+          this.setState({ checkOrder: true, isOpen: false })
+          this.setState({ checkOrder: false })
+        }
+
+      }
+    }).catch(err => {
+      console.log(err);
+    })
   }
   onLongPress() {
     if (this.state.readyToDrive === false && this.state.isOrderedPickedUp === false) {
@@ -155,8 +163,15 @@ class HomePage extends Component {
       return;
     }
   }
+  onLongPressTitle() {
+    nextTrip().then(isAccepted => {
+      if (isAccepted) {
+        this.setState({ nextTripAccepted: isAccepted })
+        this.setState({ nextTripAccepted: null, isOpen: false })
+      }
+    }).catch(err => console.log(err));
+  }
   render() {
-
     return (
       <SideMenu isOpen={this.state.isOpen}>
         <Container>
@@ -167,13 +182,22 @@ class HomePage extends Component {
             // leftIconName="ios-menu"
             iconSize={30}
             onLongPressRight={() => console.log('right long press')}
-            onPressTitle={() => console.log("title is pressed")}
+            onPressTitle={() => console.log('title pressed')}
             onPressRight={() => this.isReadyToDrive2()}
             onPressLeft={() => this.setState({ isOpen: true })}
-            onLongPressTitle={() => this.onLongPress()}
+            onLongPressTitle={() => this.onLongPressTitle()}
           />
-          <Notification />
-
+          <Notification
+            readyToDrive={this.state.checkOrder}
+            nextTripAccepted={this.state.nextTripAccepted}
+            testFun={(x) => {
+              let redColor = '#E74C3C';
+              if (x === "red" && this.state.rightIconColor !== redColor) {
+                this.setState({ rightIconColor: redColor, readyToDrive: false })
+              }
+              console.log(x)
+            }}
+          />
         </Container>
       </SideMenu>
 

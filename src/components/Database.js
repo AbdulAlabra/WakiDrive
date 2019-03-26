@@ -1,7 +1,7 @@
 import firebase from './Firebase';
+import localStorage from './localStorage'
 
-
-const AddUser = (userId, firstName, lastName, phone, email, password) => {
+const AddUser = (userId, firstName, lastName, phone, email, password, token) => {
     firebase.database().ref(`drivers/registeredDrivers/${userId}`).set(
         {
             driverInfo: {
@@ -9,7 +9,8 @@ const AddUser = (userId, firstName, lastName, phone, email, password) => {
             lastName,
             phone,
             email,
-            password
+            password,
+            token
             },
             driverStatus: {
                 car: "Honda",
@@ -20,18 +21,20 @@ const AddUser = (userId, firstName, lastName, phone, email, password) => {
             driverHistory: {
                 canceledOrders: {
                     totalOrders: 0,
+                    totalMoneyMade: 0
                 },
                 completedOrders: {
                     totalOrders: 0,
                 },
-                totalMoneyMade: 0
+                
                 
             }
             
         }
     ).then(res =>{
-
-        console.log(res)
+        let driverID = firebase.auth().currentUser.uid
+        
+        localStorage.storeData('@driverID', driverID)
         console.log('SUCCESS');
     })
     .catch(err => console.log(err));

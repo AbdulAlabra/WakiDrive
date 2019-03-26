@@ -108,7 +108,6 @@ const UpdateDriverStatus = driverID => {
         .then(() => UpdateDriverHistory(driverID))
         .catch(err => console.log(err))
 }
-
 const UpdateDriverHistory = driverID => {
     db.ref(`drivers/registeredDrivers/${driverID}/driverHistory/completedOrders/orders/${getDate()}`).push().update({
         time: '1 hour',

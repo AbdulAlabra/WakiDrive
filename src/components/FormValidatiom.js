@@ -1,7 +1,7 @@
 import Auth from './auth';
 import Alert from './Alert';
 import AddUser from './Database'
-
+import localStorage from './localStorage'
 
 const FormValidation = (firstName, lastName, phone, email, password, cb) => {
     if (firstName.trim() === "") {
@@ -23,7 +23,20 @@ const FormValidation = (firstName, lastName, phone, email, password, cb) => {
         Auth(email, password, "signup", (userId) => {
             console.log('hello from validate')
             cb(userId)
-            AddUser(userId, firstName, lastName, phone, email, password);
+            localStorage.retrieveData('@fcmToken')
+                .then(token => {
+                    if (token) {
+                        AddUser(userId, firstName, lastName, phone, email, password, token);
+                    }
+                    else {
+                        AddUser(userId, firstName, lastName, phone, email, password, false);
+
+                    }
+                })
+                .catch(err => {
+                    console.log(err)
+                    AddUser(userId, firstName, lastName, phone, email, password, 'err');
+                })
         }
         );
 

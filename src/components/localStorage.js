@@ -19,7 +19,7 @@ var CRUD = {
         try {
 
             await AsyncStorage.setItem(key, JSON.stringify(value), () => {
-                console.log('data is stored');
+                // console.log('data is stored');
                 return value;
             });
             return value;
@@ -35,7 +35,7 @@ var CRUD = {
             const value = await AsyncStorage.getItem(key);
             if (value !== null) {
                 const parsedValue = JSON.parse(value);
-                console.log('item is retrived')
+                // console.log('item is retrived')
                 return parsedValue;
             }
         } catch (error) {
