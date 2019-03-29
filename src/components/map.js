@@ -4,6 +4,7 @@ import { Container } from 'native-base';
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
 
 
+
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
 var LATITUDE_DELTA = 0.01;
@@ -69,23 +70,14 @@ class Map extends Component {
                     }}
                     showsTraffic={true}
                     showsUserLocation={true}
-                    showsMyLocationButton={true}
+                    // showsMyLocationButton={true}
                     scrollEnabled={true}
                     followsUserLocation={true}
                     region={this.state.region}
                 >
-                    {/* <Notification>
-                    </Notification>  */}
-                    {/* <Polyline
-                        coordinates={this.props.cords}
-                        strokeWidth={5}
-                        strokeColor="green"
-                    /> */}
                     {polyline}
                     {marker}
                     {this.props.children}
-                    {/* {this.watchUserLocation()} */}
-
                 </MapView>
             </Container>
 

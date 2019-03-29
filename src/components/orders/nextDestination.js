@@ -9,7 +9,7 @@ import end from '../endJourney/end'
 const pickNextStore = () => {
     return localStorage.retrieveData('@isDrivingNow')
         .then((isDrivingNow) => {
-            console.log(isDrivingNow);
+
             if (isDrivingNow) {
                 return getOverallOrder()
                 // uncomment this when ready to publish
@@ -61,11 +61,11 @@ const getOverallOrder = () => {
                     else {
                         return end().then(res => {
                             if (res) {
-                                // messege('Thanks', 'Wait for new order ');
+                                // messege('Thanks',  res.toString());
                                 return 'delivered'
                             }
                             else {
-                                messege('Something went wrong', 'please wait ');
+                                messege('Something went wrong', res.toString());
                                 return 'not delivered'
                             }
                         })
@@ -118,27 +118,5 @@ const saveOrder = (overallOrder, currentOrder) => {
 const messege = (title, body) => {
     Alert(title, body, () => console.log('ok'), () => console.log('cancel'));
 }
-const finalCheck = () => {
-    Alert('ARE YOU SURE ?', "Did the custome get the item ? \n if YES, then click OK, if NOT, then hit no", () => {
-        end().then(res => {
-            if (res) {
-                messege('Thanks', 'Wait for new order ');
-                return 'delivered'
-            }
-            else {
-                messege('Something went wrong', 'please wait ');
-                return 'not delivered'
-            }
-        })
-            .catch(err => {
-                console.log(err)
-                return false
-            })
-    },
-        () => {
-            return 'not delivered'
-        },
-        'Yes', 'NO'
-    )
-}
+
 export default pickNextStore

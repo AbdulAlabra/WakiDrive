@@ -1,4 +1,4 @@
-
+import React from "react";
 
 const orderDetails = async (obj) => {
     let name = obj.storeName
@@ -11,10 +11,10 @@ const orderDetails = async (obj) => {
             let photo = (product.photo === 'url') ? 'not available' : 'we have url'
             let quantity = product.quantity
             let size = (product.size === "") ? 'not available' : product.size
-            let text = `Product: ${name}\nColor: ${color}\nSize: ${size}\nQuantity: ${quantity}\nPhoto: ${photo}\n_________\n`
+            let text = `\nProduct: ${name}\nColor: ${color}\nSize: ${size}\nQuantity: ${quantity}\nPhoto: ${photo}\n__________________`
             return prev + text
         }, "")
-        return { name: name, orderDetails: items }
+        return { total: order.products.length, name: name, orderDetails: items, additionalInstructions: additionalInstructions }
     }
     else {
         return { name: 'Final Destination !', orderDetails: 'Make Sure You Do not Hit this button again until you deliver the item to customer' }

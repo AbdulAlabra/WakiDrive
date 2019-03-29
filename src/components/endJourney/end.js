@@ -13,20 +13,13 @@ const updateDriverStatus = () => {
                     return firebase.database().ref(`drivers/readyToDrive/${driverID}`).set(driver)
                         .then(() => {
                             res.ref.set(null);
-                            return localStorage.storeData('@isDrivingNow', false)
+                            return delivered()
                                 .then(res => {
-                                    return delivered()
-                                        .then(res => {
-                                            console.log('resssss ' + res)
-                                            return true
-                                        })
-                                        .catch(err => {
-                                            console.log(err)
-                                            return false
-                                        })
+                                    console.log('resssss ' + res)
+                                    return res
                                 })
                                 .catch(err => {
-                                    console.log(err);
+                                    console.log(err)
                                     return false
                                 })
                         })
@@ -46,6 +39,8 @@ const updateDriverStatus = () => {
         })
 }
 
-
+const updateLocalStorage = () => {
+    return
+}
 
 export default updateDriverStatus

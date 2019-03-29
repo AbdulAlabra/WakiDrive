@@ -53,7 +53,7 @@ export default class Notification extends Component {
         }
 
     }
-    
+
     isDrivingNow() {
         localStorage.retrieveData('@isDrivingNow')
             .then(res => {
@@ -62,7 +62,15 @@ export default class Notification extends Component {
                     this.route()
                 }
                 else {
-                    this.checkOrders();
+                    localStorage.retrieveData('@isReadyToDrive')
+                    .then(res => {
+                        if (res) {
+                            this.checkOrders();
+                        }
+                        else {
+                            this.showAlert("Do not miss any order", "turn on the button", false);
+                        }
+                    })
                 }
             }).catch(err => console.log(err));
     }
@@ -72,8 +80,11 @@ export default class Notification extends Component {
             .then(driverID => {
                 if (driverID) {
                     firebase.database().ref(`orderListeners/${driverID}`).once('value', snapshot => {
-                        let numOrder = snapshot.numChildren().toString();
+                        let numOrder = snapshot.numChildren();
                         this.setState({ totalOrders: numOrder })
+                        if (numOrder === 0) {
+                            this.showAlert('You do not have any orders now', "Stay close to your phone we will give an order soon", false)
+                        }
                         return this.ListenToComingOrders();
                     })
                 }

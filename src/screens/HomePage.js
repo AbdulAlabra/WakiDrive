@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Container } from 'native-base';
+import { Container, View } from 'native-base';
 import Header from "../components/Header";
 import SideMenu from './Menu'
-import { View, Dimensions } from "react-native"
+import { Dimensions } from "react-native"
 import { Marker } from 'react-native-maps';
 import isDrivingNow from '../components/DriverNow';
 import localStorage from '../components/localStorage'
@@ -11,6 +11,8 @@ import Notification from '../components/notifications/notification'
 import nextTrip from '../components/orders/nextDestination';
 import Alert from '../components/Alert'
 import isReadyToDrive from '../components/isReadyToDrive'
+import ActionButton from "../components/ActionButton/ActionButton"
+import Modal from '../components/ActionButton/Modal'
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
 var LATITUDE_DELTA = 0.01;
@@ -187,6 +189,7 @@ class HomePage extends Component {
             onPressLeft={() => this.setState({ isOpen: true })}
             onLongPressTitle={() => this.onLongPressTitle()}
           />
+
           <Notification
             readyToDrive={this.state.checkOrder}
             nextTripAccepted={this.state.nextTripAccepted}
@@ -195,14 +198,20 @@ class HomePage extends Component {
               if (x === "red" && this.state.rightIconColor !== redColor) {
                 this.setState({ rightIconColor: redColor, readyToDrive: false })
               }
-              console.log(x)
             }}
           />
+
+
+            <ActionButton
+            // style={styles}
+            />
+
         </Container>
       </SideMenu>
 
     );
   }
 }
+
 
 export default HomePage

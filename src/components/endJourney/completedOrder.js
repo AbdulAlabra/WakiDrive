@@ -1,6 +1,7 @@
 import firebase from "../Firebase"
 import localStorage from "../localStorage"
 import moment from 'moment-timezone';
+import updateLocalStorage from './updateLocalStorage'
 
 const db = firebase.database();
 
@@ -22,13 +23,14 @@ const addCompletedOrder = (driverID, assignedAt, orderRefrence, orderID) => {
             return updateTotalMoeny(driverID)
                 .then(isDone => {
                     if (isDone) {
-                       return removeOrderLisner(driverID, orderID)
+                        return removeOrderLisner(driverID, orderID)
                             .then(() => {
-                                return true;
+                                return updateLocalStorage();
                             })
                     }
                     else {
-                        return 'order is not removed from this driver'
+                        'order is not removed from this driver'
+                        return isDone
                     }
                 })
                 .catch(err => {
@@ -59,12 +61,12 @@ const updateTotalMoeny = (driverID) => {
                 })
                 .catch(err => {
                     console.log(err)
-                    return false
+                    return err
                 })
         })
         .catch(err => {
             console.log(err)
-            return false
+            return err
         })
 }
 
@@ -77,7 +79,6 @@ const orderDetails = () => {
 
             return localStorage.retrieveData('@driverID')
                 .then(driverID => {
-
                     return addCompletedOrder(driverID, assignedAt, orderRefrence, orderID)
                 })
                 .catch(err => {

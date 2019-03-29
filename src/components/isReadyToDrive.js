@@ -6,9 +6,7 @@ const db = firebase.database();
 const readyToDrive = (status) => {
     return localStorage.retrieveData('@driverID')
         .then(driverID => {
-
-           
-            if (driverID !== null) {
+            if (driverID) {
                 if (status) {
                      db.ref(`drivers/registeredDrivers/${driverID}`).once('value', function (data) {
                         var token = ""
@@ -85,6 +83,7 @@ const messege = (body, title) => {
     Alert(body, title, () => console.log('ok'), () => console.log('cancel'))
 }
 const saveStatus = (status) => {
+
     localStorage.storeData('@isReadyToDrive', status)
     .then(res => console.log('Is Driver Ready to drive ' + status))
     .catch(err => console.log(err));
