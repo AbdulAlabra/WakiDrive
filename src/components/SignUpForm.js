@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
-import { Container, Form, Item, Text, Input, Label, Button, Title, Footer } from 'native-base';
+import { Container, Form, Item, Text, Input, Label, Button, Title, Footer, View } from 'native-base';
 import SideMenu from '../screens/Menu';
 import Header from './Header'
 import Modal from "./Modal"
 import ValidateForm from "./FormValidatiom"
 import firebase from "./Firebase"
 import { Dimensions, StyleSheet } from "react-native"
-
+import Modal2 from './ActionButton/Modal'
+import PhoneNumber from "./verifyUserInfo/PhoneNumberVerify"
+import verifyUser from './verifyUserInfo/verifiyUser'
 const { width, height } = Dimensions.get('window');
 
 class SignUpForm extends Component {
@@ -16,69 +18,164 @@ class SignUpForm extends Component {
     password: "",
     firstName: "",
     lastName: "",
-    phone: ""
+    phone: "",
+    contryCode: "+966",
+    acctStatus: "",
+    userId: false,
+    isModalVisible: false,
+    warning: ""
+
   };
   static navigationOptions = {
     header: null
   }
 
-  updateUserProfireWithGoogle() {
+  componentWillMount() {
+    // verifyUser().then(res => {
+    //   console.log(res)
+    //   this.setState({ acctStatus: res });
+    // }).catch(err => {
+    //   console.log(err);
+    // })
+  }
+  _toggleModal = () =>
+    this.setState({ isModalVisible: !this.state.isModalVisible });
+
+  updateUserProfireWithGoogle(userId) {
     var user = firebase.auth().currentUser;
     user.updateProfile({
       displayName: this.state.firstName,
       photoURL: "not",
-      hhhh: "hhhd"
     })
       .then(() => {
-        console.log(user);
+
         this.setState({
           isOpen: false,
           email: "",
           password: "",
           firstName: "",
           lastName: "",
-          phone: ""
+          phone: "",
+          isModalVisible: true,
+
         });
       })
       .catch(function (error) {
         console.log(error);
       });
-
   }
   returnStyles() {
-    console.log(height)
+
     if (height >= 812) {
       return { marginBottom: "20%" }
     }
-    else if ( height >= 736 && height < 812) {
+    else if (height >= 736 && height < 812) {
       return { marginBottom: "10%" }
     }
-  else {
-    return { marginBottom: "4%" }
+    else {
+      return { marginBottom: "4%" }
+    }
   }
-}
   titleStyle() {
-   if (height >= 812 && height < 896) {
-     //iphone x
-     console.log('iphone x')
-     return { marginTop: "10%", marginBottom: "5%" }
-   }
-   else if (height >= 896) {
-     console.log('iphone max')
-     //iphone X Max
-     return { marginTop: "10%", marginBottom: "10%" }
-   }
-   // iphone 8 plus 736
-   else {
-     console.log('small iphone')
-    return { marginTop: "5%", marginBottom: "5%" }
-   }
+    if (height >= 812 && height < 896) {
+      //iphone x
+      return { marginTop: "10%", marginBottom: "5%" }
+    }
+    else if (height >= 896) {
+      //iphone X Max
+      return { marginTop: "10%", marginBottom: "10%" }
+    }
+    // iphone 8 plus 736
+    else {
+      return { marginTop: "5%", marginBottom: "5%" }
+    }
+  }
+  form() {
+    if (!this.state.acctStatus) {
+      return (
+        <Form style={this.returnStyles()}>
+          <Item style={{ marginTop: "10%" }} fixedLabel>
+            <Label>First Name</Label>
+            <Input
+              value={this.state.firstName}
+              onChangeText={firstName => this.setState({ firstName, isOpen: false })}
+            />
+          </Item>
+
+          <Item style={{ marginTop: "10%" }} fixedLabel last>
+            <Label>Last Name</Label>
+            <Input
+              value={this.state.lastName}
+              onChangeText={lastName => this.setState({ lastName, isOpen: false })}
+            />
+          </Item>
+
+          <Item style={{ marginTop: "10%" }} fixedLabel last>
+            <Label>Phone</Label>
+            <Input
+              value={this.state.phone}
+              onChangeText={phone => this.setState({ phone, isOpen: false })}
+            />
+
+          </Item>
+          <Item style={{ marginTop: "10%" }} fixedLabel last>
+            <Label>Email</Label>
+            <Input
+              value={this.state.email}
+              onChangeText={email => this.setState({ email, isOpen: false })}
+            />
+
+          </Item>
+          <Item style={{ marginTop: "10%" }} fixedLabel last>
+            <Label>Password</Label>
+            <Input
+              value={this.state.password}
+              onChangeText={password => this.setState({ password, isOpen: false })}
+              secureTextEntry={true}
+            />
+          </Item>
+
+        </Form>
+      )
+    }
+  }
+  button(firstName, lastName, phone, email, password) {
+    if (this.state.acctStatus) {
+      return (
+
+        <Button full info style={{ height: '10%' }} onPress={() => {
+         
+          this.setState({ isModalVisible: true });
+        }}>
+          <Text>Complete Registration</Text>
+        </Button>
+
+      )
+    }
+    else {
+
+      return (
+        <Button full info style={{ height: '10%' }} onPress={() => {
+          let user = firebase.auth().currentUser
+          console.log(user);
+          ValidateForm(firstName, lastName, phone, email, password, (userId) => {
+            this.updateUserProfireWithGoogle()
+          });
+        }}>
+          <Text>Submit</Text>
+        </Button>
+      )
+    }
   }
   render() {
-    const { firstName, lastName, phone, email, password } = this.state;
-    return (
 
+    const { firstName, lastName, phone, email, password, userId } = this.state;
+
+    return (
       <SideMenu isOpen={this.state.isOpen}>
+
+
+
         <Container>
           <Header
             title="WakiDrive"
@@ -91,58 +188,16 @@ class SignUpForm extends Component {
           />
 
           <Title style={this.titleStyle()} >Sign Up & Drive Now!</Title>
-
           <Modal
             TextToShow={'log in if you have an account'}
           />
-          <Form style={this.returnStyles()}>
-            <Item style={{ marginTop: "10%" }} fixedLabel>
-              <Label>First Name</Label>
-              <Input
-                value={this.state.firstName}
-                onChangeText={firstName => this.setState({ firstName, isOpen: false })}
-              />
-            </Item>
-
-            <Item style={{ marginTop: "10%" }} fixedLabel last>
-              <Label>Last Name</Label>
-              <Input
-                value={this.state.lastName}
-                onChangeText={lastName => this.setState({ lastName, isOpen: false })}
-              />
-            </Item>
-
-            <Item style={{ marginTop: "10%" }} fixedLabel last>
-              <Label>Phone</Label>
-              <Input
-                value={this.state.phone}
-                onChangeText={phone => this.setState({ phone, isOpen: false })}
-              />
-
-            </Item>
-            <Item style={{ marginTop: "10%" }} fixedLabel last>
-              <Label>Email</Label>
-              <Input
-                value={this.state.email}
-                onChangeText={email => this.setState({ email, isOpen: false })}
-              />
-
-            </Item>
-            <Item style={{ marginTop: "10%" }} fixedLabel last>
-              <Label>Password</Label>
-              <Input
-                value={this.state.password}
-                onChangeText={password => this.setState({ password, isOpen: false })}
-                secureTextEntry={true}
-              />
-            </Item>
-          </Form>
-          <Button full info style={{ height: '10%' }} onPress={() => {
-            ValidateForm(firstName, lastName, phone, email, password, (userId) => this.updateUserProfireWithGoogle());
-          }}>
-            <Text>Submit</Text>
-          </Button>
+          <Modal2 color='#9b59b6' toggleModal={this._toggleModal} isModalVisible={this.state.isModalVisible} >
+            <PhoneNumber acctStatus={this.state.acctStatus}/>
+          </Modal2 >
+          {this.form()}
+          {this.button(firstName, lastName, phone, email, password)}
         </Container>
+
       </SideMenu>
     );
   }

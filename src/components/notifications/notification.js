@@ -83,7 +83,7 @@ export default class Notification extends Component {
                         let numOrder = snapshot.numChildren();
                         this.setState({ totalOrders: numOrder })
                         if (numOrder === 0) {
-                            this.showAlert('You do not have any orders now', "Stay close to your phone we will give an order soon", false)
+                            // this.showAlert('You do not have any orders now', "Stay close to your phone we will give an order soon", false)
                         }
                         return this.ListenToComingOrders();
                     })

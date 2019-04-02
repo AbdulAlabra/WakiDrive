@@ -40,6 +40,7 @@ target 'WakiDrive' do
     pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
     pod 'Firebase/Core'
     pod 'Firebase/Messaging'
+    pod "Firebase/Auth"
     pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
     pod 'react-native-async-storage', :path => '../node_modules/@react-native-community/async-storage'
 

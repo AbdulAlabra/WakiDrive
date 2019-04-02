@@ -1,4 +1,4 @@
-import firebase from './Firebase';
+import firebase from "./Firebase";
 import Alert from "./Alert"
 
 
@@ -6,7 +6,7 @@ const Authentication = (email, password, TypeOfOpreation, cb) => {
     if (TypeOfOpreation === "signup") {
         firebase.auth().createUserWithEmailAndPassword(email, password)
             .then((user) => {
-                console.log(user)
+                
                 cb(user.user.uid)
                 firebase.auth().signInWithEmailAndPassword(email, password)
                     .then((user) => {

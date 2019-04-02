@@ -1,22 +1,25 @@
+import React from 'react'
 import firebase from './Firebase';
 import localStorage from './localStorage'
+import Alert from "./Alert"
+import Modal from './Modal'
 
 const AddUser = (userId, firstName, lastName, phone, email, password, token) => {
     firebase.database().ref(`drivers/registeredDrivers/${userId}`).set(
         {
             driverInfo: {
-            firstName,
-            lastName,
-            phone,
-            email,
-            password,
-            token
+                firstName,
+                lastName,
+                phone,
+                email,
+                password,
+                token
             },
             driverStatus: {
-                car: "Honda",
-                model: '2018',
-                isReadyToDrive: false,
-                isDrivingNow: false
+                car: false,
+                model: false,
+                phoneVerified: false,
+                emailVerified: false,
             },
             driverHistory: {
                 canceledOrders: {
@@ -26,18 +29,25 @@ const AddUser = (userId, firstName, lastName, phone, email, password, token) => 
                 completedOrders: {
                     totalOrders: 0,
                 },
-                
-                
+
+
             }
-            
+
         }
-    ).then(res =>{
+    ).then(res => {
         let driverID = firebase.auth().currentUser.uid
-        
+
         localStorage.storeData('@driverID', driverID)
+        localStorage.storeData('@account', true)
+        localStorage.storeData("@isSignedIn", true)
+        
+        localStorage.storeData("@phoneVerified", false)
+        localStorage.storeData("@emailVerified", false)
         console.log('SUCCESS');
+
+        // Alert("SUCCESS", "account created", () => console.log('ok'), () => console.log('ok'))
     })
-    .catch(err => console.log(err));
+        .catch(err => console.log(err));
 }
 
 

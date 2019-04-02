@@ -3,7 +3,6 @@ import { Container, View } from 'native-base';
 import Header from "../components/Header";
 import SideMenu from './Menu'
 import { Dimensions } from "react-native"
-import { Marker } from 'react-native-maps';
 import isDrivingNow from '../components/DriverNow';
 import localStorage from '../components/localStorage'
 import permission from '../components/notifications/helpers/permission';
@@ -12,7 +11,9 @@ import nextTrip from '../components/orders/nextDestination';
 import Alert from '../components/Alert'
 import isReadyToDrive from '../components/isReadyToDrive'
 import ActionButton from "../components/ActionButton/ActionButton"
-import Modal from '../components/ActionButton/Modal'
+import Verify from "../components/verifyUserInfo/ShowModal"
+// import firebase from "../components/Firebase"
+
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
 var LATITUDE_DELTA = 0.01;
@@ -30,6 +31,8 @@ class HomePage extends Component {
     newOrderRecived: false,
     isOrderedPickedUp: '',
     isOrderRecieved: false,
+    isModalVisible: false,
+
     title: 'WakiDrive',
     nextTripAccepted: undefined,
     delivered: false,
@@ -62,32 +65,8 @@ class HomePage extends Component {
       })
       .catch(err => console.log(err))
   }
-  returnMarker() {
-    if (this.state.newOrderRecived) {
-      if (this.state.isOrderedPickedUp) {
-        console.log('store to buyer');
-        return (
-          <View>
-            <Marker title="Store" onPress={() => console.log('Marker is pressed')} coordinate={this.state.store} />
-            <Marker title="Buyer" onPress={() => console.log('Marker is pressed')} coordinate={this.state.buyer} />
-          </View>
-        );
-      }
-      else if (!this.state.isOrderedPickedUp) {
-        console.log('driver to store')
-        return (
-          <View>
-            <Marker title="Driver" onPress={() => console.log('Marker is pressed')} coordinate={this.state.driver} />
-            <Marker title="Store" onPress={() => console.log('Marker is pressed')} coordinate={this.state.store} />
-          </View>
-        );
-      }
 
-    }
-    else {
-      return
-    }
-  }
+ 
   componentDidMount() {
     permission()
   }
@@ -202,10 +181,8 @@ class HomePage extends Component {
           />
 
 
-            <ActionButton
-            // style={styles}
-            />
-
+          <ActionButton />
+          <Verify />
         </Container>
       </SideMenu>
 
