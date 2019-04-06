@@ -17,7 +17,6 @@ class SideMenu extends Component {
                     <Text style={styles.textStyle}>Log Out</Text>
                 </Button>
             );
-
         }
         else {
             return (

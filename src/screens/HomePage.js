@@ -12,7 +12,6 @@ import Alert from '../components/Alert'
 import isReadyToDrive from '../components/isReadyToDrive'
 import ActionButton from "../components/ActionButton/ActionButton"
 import Verify from "../components/verifyUserInfo/ShowModal"
-// import firebase from "../components/Firebase"
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -65,8 +64,6 @@ class HomePage extends Component {
       })
       .catch(err => console.log(err))
   }
-
- 
   componentDidMount() {
     permission()
   }

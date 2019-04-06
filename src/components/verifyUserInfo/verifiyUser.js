@@ -3,14 +3,21 @@ import localStorage from '../localStorage'
 
 const veriifyUser = () => {
     return localStorage.retrieveData("@account").then((account) => {
+        console.log("account :" + account)
         if (account) {
             return localStorage.retrieveData("@isSignedIn").then((isSignedIn) => {
+                console.log("isSignedIn :" + isSignedIn)
+
                 if (isSignedIn) {
                     return localStorage.retrieveData("@phoneVerified").then((phoneVerified) => {
+                        console.log("phoneVerified :" + phoneVerified)
+
                         if (phoneVerified) {
                             return localStorage.retrieveData("@emailVerified").then((emailVerified) => {
+                                console.log(" emailVerified:" + emailVerified )
+
                                 if (emailVerified) {
-                                    'verified'
+                                    return 'verified'
                                 }
                                 else {
                                     return 'email'

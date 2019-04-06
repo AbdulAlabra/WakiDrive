@@ -1,5 +1,6 @@
 // Optional: Flow type
 import React, { Component } from 'react';
+import { Dimensions } from 'react-native';
 import { Container } from 'native-base';
 import RNFirebase from 'react-native-firebase';
 import Alert from '../Alert'
@@ -14,7 +15,12 @@ import LetsDrive from '../orders/LetsDrive'
 import currentDestination from '../orders/currentDestination'
 import moment from "moment-timezone"
 import readyToDrive from "../isReadyToDrive"
+import polylineChecker from "../RedirectUserLocation"
 
+const { width, height } = Dimensions.get('window');
+const ASPECT_RATIO = width / height;
+var LATITUDE_DELTA = 0.01;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 export default class Notification extends Component {
     state = {
@@ -26,6 +32,9 @@ export default class Notification extends Component {
         isAlertOpen: false,
         driverStatus: undefined,
         coordinates: [],
+        steps: [],
+        stepStatus: undefined,
+        currentStep: 0
     }
 
     componentWillMount() {
@@ -47,11 +56,9 @@ export default class Notification extends Component {
         // this.onTokenRefreshListener();
     }
     componentDidUpdate() {
-        console.log("componentDidUpdate is ready to drive : " + this.props.readyToDrive)
         if (this.props.nextTripAccepted) {
             this.nextTrip(this.props.nextTripAccepted)
         }
-
     }
 
     isDrivingNow() {
@@ -63,14 +70,14 @@ export default class Notification extends Component {
                 }
                 else {
                     localStorage.retrieveData('@isReadyToDrive')
-                    .then(res => {
-                        if (res) {
-                            this.checkOrders();
-                        }
-                        else {
-                            this.showAlert("Do not miss any order", "turn on the button", false);
-                        }
-                    })
+                        .then(res => {
+                            if (res) {
+                                this.checkOrders();
+                            }
+                            else {
+                                this.showAlert("Do not miss any order", "turn on the button", false);
+                            }
+                        })
                 }
             }).catch(err => console.log(err));
     }
@@ -110,16 +117,22 @@ export default class Notification extends Component {
             }
         }).catch(err => console.log(err));
     }
-
     route() {
         currentDestination().then(destination => {
             navigator.geolocation.getCurrentPosition(location => {
+                let lat = location.coords.latitude.toString()
+                let long = location.coords.longitude.toString()
                 let origin = {
                     latitude: location.coords.latitude,
                     longitude: location.coords.longitude
                 }
-                directions(origin, destination).then(cords => {
-                    this.setState({ coordinates: cords });
+                directions(origin, destination).then(steps => {
+                    if (this.state.steps.length !== 0) {
+                        this.setState({ coordinates: steps.cords });
+                    }
+                    else {
+                        this.setState({ coordinates: steps.cords, steps: steps.steps, currentStep: 0 });
+                    }
                 }).catch(err => console.log(err));
             });
 
@@ -142,7 +155,6 @@ export default class Notification extends Component {
             // this.showAlert(orderID, 'getInitialNotification', false);
         }
     }
-
     // order Checking proccess
     // #1
     ListenToComingOrders() {
@@ -305,7 +317,7 @@ export default class Notification extends Component {
     }
     // order Checking proccess
     delivered() {
-        this.setState({ coordinates: [] });
+        this.setState({ coordinates: [], steps: [] });
         Alert('You Did it! Thanks..', 'You like to keep driving ?',
             () => {
                 this.checkOrders()
@@ -316,10 +328,18 @@ export default class Notification extends Component {
                 this.setState({ driverStatus: undefined })
             },
             "Yes", "No")
-
     }
     watchUserLocation() {
         navigator.geolocation.watchPosition(position => {
+
+            if (this.state.steps.length > 0) {
+                let driverLocation = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                }
+                this.stepChecker(driverLocation)
+            }
+
             this.setState({
                 region: {
                     latitude: position.coords.latitude,
@@ -330,7 +350,31 @@ export default class Notification extends Component {
             });
         }, err => console.log(err));
     }
+    stepChecker(driverLocation) {
+        const { steps, currentStep } = this.state
+        let step = steps[currentStep]
+        polylineChecker(step, driverLocation)
+            .then(res => {
+                console.log(res);
+                if (res === "step completed") {
+                    if (steps[currentStep + 1] === undefined) {
+                        this.setState({ stepStatus: "completed", steps: [] })
+                    }
+                    else {
+                        this.setState({ currentStep: currentStep + 1 });
+                    }
+                }
 
+                else if (res === "redirect") {
+                    this.route();
+                    this.setState({ stepStatus: res })
+                }
+            })
+            .catch(err => {
+                this.setState({ stepStatus: undefined })
+                console.log(err)
+            })
+    }
     render() {
         const { readyToDrive, nextTripAccepted, testFun } = this.props
         return (
@@ -341,7 +385,9 @@ export default class Notification extends Component {
             >
                 <Map
                     cords={this.state.coordinates}
+                    region={this.state.region}
                 />
+                {this.watchUserLocation()}
             </Container>
         )
     }

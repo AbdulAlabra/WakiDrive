@@ -103,51 +103,60 @@ export default class DateTimePickerTester extends Component {
                     }).then(res => {
                         let result = res.val();
                         // console.log(result)
-                        res.forEach(thisDay => {
-                            let date = <Title>{thisDay.key}</Title>;
-                            let numOfOrders = <Title>Total Orders: {thisDay.numChildren()}</Title>;
-                            let ordersContent = [];
-                            thisDay.forEach(thisOrder => {
-                                let order = thisOrder.val();
-                                // console.log(order.duration)
-                                let duration = <Text>duration: {order.duration}</Text>
-                                let moneyMadeToday = <Text>You Made: {order.moneyMadeToday}$</Text>
-                                let thisOrderInfo = <View style={{
+                        if (result !== null) {
+
+
+                            res.forEach(thisDay => {
+                                let date = <Title>{thisDay.key}</Title>;
+                                let numOfOrders = <Title>Total Orders: {thisDay.numChildren()}</Title>;
+                                let ordersContent = [];
+                                thisDay.forEach(thisOrder => {
+                                    let order = thisOrder.val();
+                                    // console.log(order.duration)
+                                    let duration = <Text>duration: {order.duration}</Text>
+                                    let moneyMadeToday = <Text>You Made: {order.moneyMadeToday}$</Text>
+                                    let thisOrderInfo = <View style={{
+                                        borderBottomColor: 'black',
+                                        borderBottomWidth: 0.5,
+                                        flexDirection: "row",
+                                        justifyContent: "space-around"
+
+                                    }}>
+                                        {duration}
+                                        {moneyMadeToday}
+                                    </View>
+                                    ordersContent.push(thisOrderInfo)
+                                })
+
+                                let newData = this.state.History;
+                                let content = <View style={{
                                     borderBottomColor: 'black',
-                                    borderBottomWidth: 0.5,
-                                    flexDirection: "row",
-                                    justifyContent: "space-around"
+                                    borderBottomWidth: 1
 
                                 }}>
-                                    {duration}
-                                    {moneyMadeToday}
+                                    {date}
+                                    {numOfOrders}
+                                    {ordersContent.map(orderInfo => {
+                                        return orderInfo
+                                    })}
+
                                 </View>
-                                ordersContent.push(thisOrderInfo)
+                                newData.push(content)
+                                this.setState({ History: newData })
                             })
 
-                            let newData = this.state.History;
-                            let content = <View style={{
-                                borderBottomColor: 'black',
-                                borderBottomWidth: 1
-
-                            }}>
-                                {date}
-                                {numOfOrders}
-                                {ordersContent.map(orderInfo => {
-                                    return orderInfo
-                                })}
-
-                            </View>
-                            newData.push(content)
-                            this.setState({ History: newData })
-                        })
-
-                        this.setState({ isDone: true })
+                            this.setState({ isDone: true })
+                        }
+                        else {
+                            this.message("No Orders within the range you have selcted")
+                        }
                     })
                         .catch(err => {
                             console.log(err);
                         })
+
                 }
+
             })
             .catch(err => {
                 console.log(err);
@@ -164,8 +173,8 @@ export default class DateTimePickerTester extends Component {
     render() {
 
         return (
-            <View style={{flex:1 }}>
-                <View style={{ marginTop:40, flexDirection: "row", justifyContent: "space-evenly" }}>
+            <View style={{ flex: 1 }}>
+                <View style={{ marginTop: 40, flexDirection: "row", justifyContent: "space-evenly" }}>
                     <View>
                         <TouchableOpacity onPress={this._showDateTimePicker1}>
                             <Text style={{ fontWeight: 'bold' }}>From {"\n" + this.state.from}</Text>

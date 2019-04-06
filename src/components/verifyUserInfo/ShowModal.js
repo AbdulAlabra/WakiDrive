@@ -14,6 +14,7 @@ class ShowModal extends Component {
     }
     verify() {
         isVerified().then(res => {
+            console.log("res " + res)
             this.setState({ status: res })
         })
             .catch(err => {

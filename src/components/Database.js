@@ -29,20 +29,17 @@ const AddUser = (userId, firstName, lastName, phone, email, password, token) => 
                 completedOrders: {
                     totalOrders: 0,
                 },
-
-
             }
-
         }
     ).then(res => {
         let driverID = firebase.auth().currentUser.uid
 
         localStorage.storeData('@driverID', driverID)
-        localStorage.storeData('@account', true)
-        localStorage.storeData("@isSignedIn", true)
-        
-        localStorage.storeData("@phoneVerified", false)
-        localStorage.storeData("@emailVerified", false)
+        localStorage.storeData('@account', true);
+        localStorage.storeData("@isSignedIn", true);
+        localStorage.storeData("@canDrive", false);
+        localStorage.storeData("@phoneVerified", false);
+        localStorage.storeData("@emailVerified", false);
         console.log('SUCCESS');
 
         // Alert("SUCCESS", "account created", () => console.log('ok'), () => console.log('ok'))

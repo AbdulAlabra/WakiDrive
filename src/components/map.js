@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Dimensions } from 'react-native';
 import { Container } from 'native-base';
-import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from 'react-native-maps';
-
+import MapView, { PROVIDER_GOOGLE, Marker, Polyline, Circle } from 'react-native-maps';
 
 
 const { width, height } = Dimensions.get('window');
@@ -10,22 +9,25 @@ const ASPECT_RATIO = width / height;
 var LATITUDE_DELTA = 0.01;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
-
-
 class Map extends Component {
     state = {
-        region: null
+        region: null,
+        center: {
+            latitude: 38.6366,
+            longitude: -121.327271
+        },
     }
-    // componentWillMount() {
-    //     this.watchUserLocation()
-    // }
-    // componentDidMount() {
-    //     this.setState({ region: null })
 
-    // }
+    componentWillMount() {
+        navigator.geolocation.getCurrentPosition(position => {
+            let latitude = position.coords.latitude
+            let longitude = position.coords.longitude
+            this.setState({ center: { latitude, longitude } })
+        }, err => console.log(err))
+    }
     componentDidUpdate() {
         if (this.props.cords.length > 0) {
-
+            
             this.map.fitToCoordinates(this.props.cords, { edgePadding: { top: 80, right: 80, bottom: 80, left: 80 }, animated: true });
         }
 
@@ -43,16 +45,20 @@ class Map extends Component {
         }, err => console.log(err));
     }
 
-
     render() {
         let marker = null;
         let polyline = null;
+
+
         if (this.props.cords.length > 0) {
             marker = <Marker coordinate={this.props.cords[this.props.cords.length - 1]} title='Store' />
-            polyline = <Polyline coordinates={this.props.cords} strokeWidth={5} strokeColor="green" />
-
+            polyline = <Polyline coordinates={this.props.cords} strokeWidth={8} strokeColor="#1EADFF" />
         }
+        /* 
+        good blue color: 
+        #48BBFD 
 
+        */
         return (
             <Container>
                 <MapView
@@ -70,18 +76,17 @@ class Map extends Component {
                     }}
                     showsTraffic={true}
                     showsUserLocation={true}
-                    // showsMyLocationButton={true}
+                    showsMyLocationButton={true}
                     scrollEnabled={true}
                     followsUserLocation={true}
-                    region={this.state.region}
+                    region={this.props.region}
                 >
+
                     {polyline}
                     {marker}
                     {this.props.children}
                 </MapView>
             </Container>
-
-
         );
     }
 }

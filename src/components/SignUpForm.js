@@ -5,11 +5,12 @@ import Header from './Header'
 import Modal from "./Modal"
 import ValidateForm from "./FormValidatiom"
 import firebase from "./Firebase"
-import { Dimensions, StyleSheet } from "react-native"
+import { Dimensions, Keyboard, TouchableOpacity, TouchableWithoutFeedback, ScrollView } from "react-native"
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Modal2 from './ActionButton/Modal'
 import PhoneNumber from "./verifyUserInfo/PhoneNumberVerify"
 import verifyUser from './verifyUserInfo/verifiyUser'
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 class SignUpForm extends Component {
   state = {
@@ -31,12 +32,12 @@ class SignUpForm extends Component {
   }
 
   componentWillMount() {
-    // verifyUser().then(res => {
-    //   console.log(res)
-    //   this.setState({ acctStatus: res });
-    // }).catch(err => {
-    //   console.log(err);
-    // })
+    verifyUser().then(res => {
+
+      this.setState({ acctStatus: res });
+    }).catch(err => {
+      console.log(err);
+    })
   }
   _toggleModal = () =>
     this.setState({ isModalVisible: !this.state.isModalVisible });
@@ -90,61 +91,87 @@ class SignUpForm extends Component {
       return { marginTop: "5%", marginBottom: "5%" }
     }
   }
+  focusFiled(x) {
+    let prev = x.split("")
+    let fieldNum = Number(prev[1]) + 1
+    let field = `f${fieldNum.toString()}`
+    field.focus()
+  }
   form() {
-    if (!this.state.acctStatus) {
+    if (this.state.acctStatus !== "acct") { // need to change !== to ===
       return (
-        <Form style={this.returnStyles()}>
-          <Item style={{ marginTop: "10%" }} fixedLabel>
-            <Label>First Name</Label>
-            <Input
-              value={this.state.firstName}
-              onChangeText={firstName => this.setState({ firstName, isOpen: false })}
-            />
-          </Item>
+        <ScrollView>
 
-          <Item style={{ marginTop: "10%" }} fixedLabel last>
-            <Label>Last Name</Label>
-            <Input
-              value={this.state.lastName}
-              onChangeText={lastName => this.setState({ lastName, isOpen: false })}
-            />
-          </Item>
+          <Form style={this.returnStyles()}>
+            <Item style={{ marginTop: "10%" }} fixedLabel>
+              <Label>First Name</Label>
+              <Input
+                label={"f1"}
+                blurOnSubmit={false}
+                returnKeyType={"next"}
+                value={this.state.firstName}
+                // onSubmitEditing={() => this.focusFiled("f1")}
+                onChangeText={firstName => this.setState({ firstName, isOpen: false })}
+              />
+            </Item>
 
-          <Item style={{ marginTop: "10%" }} fixedLabel last>
-            <Label>Phone</Label>
-            <Input
-              value={this.state.phone}
-              onChangeText={phone => this.setState({ phone, isOpen: false })}
-            />
+            <Item style={{ marginTop: "10%" }} fixedLabel last>
+              <Label>Last Name</Label>
+              <Input
 
-          </Item>
-          <Item style={{ marginTop: "10%" }} fixedLabel last>
-            <Label>Email</Label>
-            <Input
-              value={this.state.email}
-              onChangeText={email => this.setState({ email, isOpen: false })}
-            />
+                blurOnSubmit={false}
+                label={"f2"}
+                returnKeyType={"next"}
+                value={this.state.lastName}
+                onChangeText={lastName => this.setState({ lastName, isOpen: false })}
+              />
+            </Item>
 
-          </Item>
-          <Item style={{ marginTop: "10%" }} fixedLabel last>
-            <Label>Password</Label>
-            <Input
-              value={this.state.password}
-              onChangeText={password => this.setState({ password, isOpen: false })}
-              secureTextEntry={true}
-            />
-          </Item>
+            <Item style={{ marginTop: "10%" }} fixedLabel last>
+              <Label>Phone</Label>
+              <Input
+                blurOnSubmit={false}
 
-        </Form>
+                label={"f3"}
+                returnKeyType={"next"}
+                value={this.state.phone}
+                onChangeText={phone => this.setState({ phone, isOpen: false })}
+              />
+
+            </Item>
+            <Item style={{ marginTop: "10%" }} fixedLabel last>
+              <Label>Email</Label>
+              <Input
+                label={"f4"}
+                returnKeyType={"next"}
+                value={this.state.email}
+                onChangeText={email => this.setState({ email, isOpen: false })}
+              />
+
+            </Item>
+            <Item style={{ marginTop: "10%" }} fixedLabel last>
+              <Label>Password</Label>
+              <Input
+                blurOnSubmit={false}
+                label={"f5"}
+                returnKeyType={"done"}
+                value={this.state.password}
+                onChangeText={password => this.setState({ password, isOpen: false })}
+                secureTextEntry={true}
+              />
+            </Item>
+
+          </Form>
+        </ScrollView>
+
       )
     }
   }
   button(firstName, lastName, phone, email, password) {
-    if (this.state.acctStatus) {
+    if (this.state.acctStatus !== "acct") {
       return (
 
         <Button full info style={{ height: '10%' }} onPress={() => {
-         
           this.setState({ isModalVisible: true });
         }}>
           <Text>Complete Registration</Text>
@@ -153,7 +180,6 @@ class SignUpForm extends Component {
       )
     }
     else {
-
       return (
         <Button full info style={{ height: '10%' }} onPress={() => {
           let user = firebase.auth().currentUser
@@ -173,32 +199,40 @@ class SignUpForm extends Component {
 
     return (
       <SideMenu isOpen={this.state.isOpen}>
+        <KeyboardAwareScrollView
+          style={{ backgroundColor: '#4c69a5' }}
+          resetScrollToCoords={{ x: 0, y: 0 }}
 
+          scrollEnabled={false}
+        >
+          <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <Container>
 
+              <Header
+                title="WakiDrive"
+                rightIconName="location"
+                leftIconName="ios-menu"
+                iconSize={30}
+                onPressTitle={() => this.props.navigation.navigate('Home')}
+                onPressRight={() => this.props.navigation.navigate('Home')}
+                onPressLeft={() => this.setState({ isOpen: true })}
+              />
 
-        <Container>
-          <Header
-            title="WakiDrive"
-            rightIconName="location"
-            leftIconName="ios-menu"
-            iconSize={30}
-            onPressTitle={() => this.props.navigation.navigate('Home')}
-            onPressRight={() => this.props.navigation.navigate('Home')}
-            onPressLeft={() => this.setState({ isOpen: true })}
-          />
-
-          <Title style={this.titleStyle()} >Sign Up & Drive Now!</Title>
-          <Modal
-            TextToShow={'log in if you have an account'}
-          />
-          <Modal2 color='#9b59b6' toggleModal={this._toggleModal} isModalVisible={this.state.isModalVisible} >
-            <PhoneNumber acctStatus={this.state.acctStatus}/>
-          </Modal2 >
-          {this.form()}
-          {this.button(firstName, lastName, phone, email, password)}
-        </Container>
+              <Title style={this.titleStyle()} >Sign Up & Drive Now!</Title>
+              <Modal
+                TextToShow={'log in if you have an account'}
+              />
+              <Modal2 color='#9b59b6' toggleModal={this._toggleModal} isModalVisible={this.state.isModalVisible} >
+                <PhoneNumber acctStatus={this.state.acctStatus} />
+              </Modal2 >
+              {this.form()}
+              {this.button(firstName, lastName, phone, email, password)}
+            </Container>
+          </TouchableWithoutFeedback>
+        </KeyboardAwareScrollView>
 
       </SideMenu>
+
     );
   }
 }
