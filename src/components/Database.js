@@ -24,10 +24,11 @@ const AddUser = (userId, firstName, lastName, phone, email, password, token) => 
             driverHistory: {
                 canceledOrders: {
                     totalOrders: 0,
-                    totalMoneyMade: 0
                 },
                 completedOrders: {
                     totalOrders: 0,
+                    totalMoneyMade: 0
+
                 },
             }
         }
@@ -37,6 +38,7 @@ const AddUser = (userId, firstName, lastName, phone, email, password, token) => 
         localStorage.storeData('@driverID', driverID)
         localStorage.storeData('@account', true);
         localStorage.storeData("@isSignedIn", true);
+        
         localStorage.storeData("@canDrive", false);
         localStorage.storeData("@phoneVerified", false);
         localStorage.storeData("@emailVerified", false);

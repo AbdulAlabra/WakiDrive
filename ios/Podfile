@@ -42,7 +42,7 @@ target 'WakiDrive' do
     pod 'Firebase/Messaging'
     pod "Firebase/Auth"
     pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
-    pod 'react-native-async-storage', :path => '../node_modules/@react-native-community/async-storage'
+    pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
 
     # target 'WakiDriveTests' do
     #   inherit! :search_paths

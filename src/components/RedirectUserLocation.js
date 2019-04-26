@@ -1,7 +1,7 @@
 import geolib from 'geolib'
 import Polyline from '@mapbox/polyline'
 
-
+var x = 0
 
 const steps = async (step, driverLocation) => {
 
@@ -24,19 +24,20 @@ const steps = async (step, driverLocation) => {
         end_location,
         driverLocation
     }
+
     return isDriverOnPolyLine(stepDeatils)
 }
 
-
 const isDriverOnPolyLine = async (step) => {
     let cords = step.cords
-    let start_location = step.start_location
 
+    let start_location = step.start_location
     let end_location = step.end_location
+
     let driverLocation = step.driverLocation
 
-    let IsStepEnded = geolib.isPointInCircle(driverLocation, end_location, 10)
-    let isStepStarted = geolib.isPointInCircle(driverLocation, start_location, 10)
+    let IsStepEnded = geolib.isPointInCircle(driverLocation, end_location, 50)
+    let isStepStarted = geolib.isPointInCircle(driverLocation, start_location, 100)
 
     if (IsStepEnded) {
         return "step completed";
@@ -46,7 +47,16 @@ const isDriverOnPolyLine = async (step) => {
     }
     else {
         let closestPoint = geolib.findNearest(driverLocation, cords)
-        if (closestPoint.distance >= 5) {
+        // console.log(cords.length);
+        // let compassDirection = geolib.getCompassDirection(driverLocation, end_location); // from 
+        // console.log("__________________________")
+        // console.log(`E: ${compassDirection.exact} / R: ${compassDirection.exact} .. actual`);
+
+        // let backCampass = geolib.getCompassDirection(start_location, driverLocation);
+        // console.log(`E: ${backCampass.exact} / R: ${backCampass.exact} .. back`);
+        // console.log("__________________________")  // to 
+
+        if (closestPoint.distance >= 50) {
             return "redirect"
         }
         else {
@@ -54,5 +64,7 @@ const isDriverOnPolyLine = async (step) => {
         }
     }
 }
+
+
 
 export default steps

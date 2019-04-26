@@ -10,7 +10,7 @@ const signIn = (phoneNumber) => {
                     console.log(user)
                 }) // User is logged in){
                 .catch(error => {
-                    console.log(error)
+                    console.log(error) 
                 })
         })
         .catch(error => {

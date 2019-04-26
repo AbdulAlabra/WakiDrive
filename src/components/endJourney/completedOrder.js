@@ -29,7 +29,6 @@ const addCompletedOrder = (driverID, assignedAt, orderRefrence, orderID) => {
                             })
                     }
                     else {
-                        'order is not removed from this driver'
                         return isDone
                     }
                 })

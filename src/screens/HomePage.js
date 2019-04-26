@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import { Container, View } from 'native-base';
+import { Container } from 'native-base';
 import Header from "../components/Header";
 import SideMenu from './Menu'
-import { Dimensions } from "react-native"
-import isDrivingNow from '../components/DriverNow';
 import localStorage from '../components/localStorage'
 import permission from '../components/notifications/helpers/permission';
 import Notification from '../components/notifications/notification'
@@ -13,17 +11,12 @@ import isReadyToDrive from '../components/isReadyToDrive'
 import ActionButton from "../components/ActionButton/ActionButton"
 import Verify from "../components/verifyUserInfo/ShowModal"
 
-const { width, height } = Dimensions.get('window');
-const ASPECT_RATIO = width / height;
-var LATITUDE_DELTA = 0.01;
-const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
-
-
 class HomePage extends Component {
   static navigationOptions = {
     header: null
   }
   state = {
+    drivingView: false,
     cords: '',
     coordinates: [],
     readyToDrive: true,
@@ -31,7 +24,6 @@ class HomePage extends Component {
     isOrderedPickedUp: '',
     isOrderRecieved: false,
     isModalVisible: false,
-
     title: 'WakiDrive',
     nextTripAccepted: undefined,
     delivered: false,
@@ -42,8 +34,10 @@ class HomePage extends Component {
     buyer: "",
     store: "",
     driver: null,
-    checkOrder: false
+    checkOrder: false,
+    duration: 0
   }
+  
   wasDriverReadyToDrive() {
     localStorage.retrieveData('@isReadyToDrive')
       .then(res => {
@@ -69,22 +63,6 @@ class HomePage extends Component {
   }
   componentWillMount() {
     this.wasDriverReadyToDrive()
-  }
-  watchUserLocation() {
-    navigator.geolocation.watchPosition(position => {
-      this.setState({
-        region: {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          latitudeDelta: LATITUDE_DELTA,
-          longitudeDelta: LONGITUDE_DELTA
-        },
-        driver: {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        }
-      });
-    }, err => console.log(err));
   }
   isReadyToDrive(x) {
     if (x) {
@@ -112,7 +90,7 @@ class HomePage extends Component {
       else {
         this.isReadyToDrive(this.state.readyToDrive);
         if (this.state.readyToDrive) {
-          this.setState({ checkOrder: true, isOpen: false })
+          this.setState({ checkOrder: true })
           this.setState({ checkOrder: false })
         }
 
@@ -121,26 +99,7 @@ class HomePage extends Component {
       console.log(err);
     })
   }
-  onLongPress() {
-    if (this.state.readyToDrive === false && this.state.isOrderedPickedUp === false) {
-      this.setState({ isOrderedPickedUp: true });
-      console.log('order is picked up');
-    }
-    else if (this.state.isOrderedPickedUp === true) {
-      console.log('order recived');
-      this.setState({
-        isOrderedPickedUp: '',
-        newOrderRecived: false,
-        readyToDrive: true,
-        isOrderRecieved: false
-      });
-      isDrivingNow(this.state.readyToDrive, true);
-    }
-    else {
-      console.log('no driver or you do not have an order');
-      return;
-    }
-  }
+
   onLongPressTitle() {
     nextTrip().then(isAccepted => {
       if (isAccepted) {
@@ -149,7 +108,37 @@ class HomePage extends Component {
       }
     }).catch(err => console.log(err));
   }
+  showTime(journey) {
+    clearInterval(timer)
+    let durationText = journey.duration.text
+    this.setState({ title: durationText })
+
+    let duration = Math.round(journey.duration.value / 60);
+
+    let interval = () => {
+      console.log("I run ")
+      let remainningTime = duration - 1
+      console.log(remainningTime);
+      if (remainningTime === 0 || this.state.nextTripAccepted) {
+        console.log("STop")
+        clearInterval(timer)
+      }
+      else {
+        duration = remainningTime
+        this.setState({ title: remainningTime + " mins" })
+      }
+    }
+
+    let timer = setInterval(interval, 5000)
+  }
+  testProps(title) {
+    console.log(title);
+    // if(title) {
+    //   this.setState({ title })
+    // }
+  }
   render() {
+
     return (
       <SideMenu isOpen={this.state.isOpen}>
         <Container>
@@ -157,18 +146,17 @@ class HomePage extends Component {
             title={this.state.title}
             rightIconName="car"
             rightIconColor={this.state.rightIconColor}
-            // leftIconName="ios-menu"
             iconSize={30}
             onLongPressRight={() => console.log('right long press')}
-            onPressTitle={() => console.log('title pressed')}
+            onPressTitle={() => console.log("title")}
             onPressRight={() => this.isReadyToDrive2()}
             onPressLeft={() => this.setState({ isOpen: true })}
             onLongPressTitle={() => this.onLongPressTitle()}
           />
-
           <Notification
             readyToDrive={this.state.checkOrder}
             nextTripAccepted={this.state.nextTripAccepted}
+            // journey={(x) => this.testProps(x)}
             testFun={(x) => {
               let redColor = '#E74C3C';
               if (x === "red" && this.state.rightIconColor !== redColor) {
@@ -176,9 +164,9 @@ class HomePage extends Component {
               }
             }}
           />
-
-
           <ActionButton />
+      
+        
           <Verify />
         </Container>
       </SideMenu>

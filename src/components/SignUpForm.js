@@ -98,7 +98,7 @@ class SignUpForm extends Component {
     field.focus()
   }
   form() {
-    if (this.state.acctStatus !== "acct") { // need to change !== to ===
+    if (this.state.acctStatus === "acct") { // need to change !== to ===
       return (
         <ScrollView>
 
@@ -168,7 +168,7 @@ class SignUpForm extends Component {
     }
   }
   button(firstName, lastName, phone, email, password) {
-    if (this.state.acctStatus !== "acct") {
+    if (this.state.acctStatus !== "acct") { 
       return (
 
         <Button full info style={{ height: '10%' }} onPress={() => {

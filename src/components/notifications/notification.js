@@ -1,6 +1,5 @@
 // Optional: Flow type
 import React, { Component } from 'react';
-import { Dimensions } from 'react-native';
 import { Container } from 'native-base';
 import RNFirebase from 'react-native-firebase';
 import Alert from '../Alert'
@@ -17,12 +16,8 @@ import moment from "moment-timezone"
 import readyToDrive from "../isReadyToDrive"
 import polylineChecker from "../RedirectUserLocation"
 
-const { width, height } = Dimensions.get('window');
-const ASPECT_RATIO = width / height;
-var LATITUDE_DELTA = 0.01;
-const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
-
 export default class Notification extends Component {
+
     state = {
         pressCanceled: 0,
         deletedOrders: 0,
@@ -34,7 +29,10 @@ export default class Notification extends Component {
         coordinates: [],
         steps: [],
         stepStatus: undefined,
-        currentStep: 0
+        journeyDetails: false,
+        currentStep: 0,
+        newLocation: false,
+        title: "Heeeeeeeelllloooooooo"
     }
 
     componentWillMount() {
@@ -48,7 +46,6 @@ export default class Notification extends Component {
         // });
         this.createNotificationListeners();
     }
-
     componentWillUnmount() {
         this.notificationListener();
         this.notificationOpenedListener();
@@ -60,7 +57,6 @@ export default class Notification extends Component {
             this.nextTrip(this.props.nextTripAccepted)
         }
     }
-
     isDrivingNow() {
         localStorage.retrieveData('@isDrivingNow')
             .then(res => {
@@ -81,7 +77,6 @@ export default class Notification extends Component {
                 }
             }).catch(err => console.log(err));
     }
-
     checkOrders() {
         localStorage.retrieveData('@driverID')
             .then(driverID => {
@@ -105,7 +100,6 @@ export default class Notification extends Component {
                 console.log(err);
             })
     }
-
     nextTrip(status) {
         currentDestination().then(destination => {
             if (status === 'delivered') {
@@ -126,13 +120,10 @@ export default class Notification extends Component {
                     latitude: location.coords.latitude,
                     longitude: location.coords.longitude
                 }
+
                 directions(origin, destination).then(steps => {
-                    if (this.state.steps.length !== 0) {
-                        this.setState({ coordinates: steps.cords });
-                    }
-                    else {
-                        this.setState({ coordinates: steps.cords, steps: steps.steps, currentStep: 0 });
-                    }
+                    this.setState({ coordinates: steps.cords, steps: steps.steps, journeyDetails: steps.details, currentStep: 0, newLocation: true });
+                    this.setState({ newLocation: false })
                 }).catch(err => console.log(err));
             });
 
@@ -192,7 +183,6 @@ export default class Notification extends Component {
                 }).catch(err => {
                     console.log(err);
                 });
-
             })
         }).catch(err => console.log(err));
     }
@@ -247,9 +237,8 @@ export default class Notification extends Component {
     onPressCancel(orderID, orderRefrence) {
         this.setState({ isAlertOpen: false })
         if (this.state.pressCanceled === 1) {
-            this.showAlert('Order Canceled', "You Will band you for sometime", false);
-            let driverID = firebase.auth().currentUser.uid
-            cancelOrder(driverID, orderRefrence, orderID)
+            this.showAlert('Order Canceled', "You Will band you for sometime", false);            
+            cancelOrder(orderRefrence, orderID)
         }
         else {
             this.setState({ pressCanceled: 1 })
@@ -331,23 +320,14 @@ export default class Notification extends Component {
     }
     watchUserLocation() {
         navigator.geolocation.watchPosition(position => {
+            // if (this.state.steps.length > 0) {
+            //     let driverLocation = {
+            //         latitude: position.coords.latitude,
+            //         longitude: position.coords.longitude,
+            //     }
+            //     this.stepChecker(driverLocation)
+            // }
 
-            if (this.state.steps.length > 0) {
-                let driverLocation = {
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                }
-                this.stepChecker(driverLocation)
-            }
-
-            this.setState({
-                region: {
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    latitudeDelta: LATITUDE_DELTA,
-                    longitudeDelta: LONGITUDE_DELTA
-                }
-            });
         }, err => console.log(err));
     }
     stepChecker(driverLocation) {
@@ -356,24 +336,33 @@ export default class Notification extends Component {
         polylineChecker(step, driverLocation)
             .then(res => {
                 console.log(res);
-                if (res === "step completed") {
-                    if (steps[currentStep + 1] === undefined) {
-                        this.setState({ stepStatus: "completed", steps: [] })
-                    }
-                    else {
-                        this.setState({ currentStep: currentStep + 1 });
-                    }
-                }
-
-                else if (res === "redirect") {
-                    this.route();
-                    this.setState({ stepStatus: res })
-                }
+                // if (res === "step completed") {
+                //     if (steps[currentStep + 1] === undefined) {
+                //         this.setState({ stepStatus: "completed", steps: [] })
+                //     }
+                //     else {
+                //         this.setState({ currentStep: currentStep + 1 });
+                //     }
+                // }
+                // else if (res === "redirect") {
+                //     this.route();
+                //     this.setState({ stepStatus: res })
+                // }
             })
             .catch(err => {
                 this.setState({ stepStatus: undefined })
                 console.log(err)
             })
+    }
+    journeyFunction() {
+        console.log(this.state.journeyDetails);
+        if (this.state.journeyDetails === false) {
+            return;
+        } else {
+            this.props.journey(this.state.journeyDetails)
+        }
+        // this.setState({ title: false })
+        // return journy
     }
     render() {
         const { readyToDrive, nextTripAccepted, testFun } = this.props
@@ -382,11 +371,15 @@ export default class Notification extends Component {
                 readyToDrive={(readyToDrive === true) ? this.checkOrders() : null}
                 nextTripAccepted={nextTripAccepted}
                 testFun={testFun(this.state.driverStatus)}
+            // journey={(this.state.journeyDetails === false) ? null : journey(this.journeyFunction())}
+            // journey={this.journeyFunction()}
+
             >
                 <Map
                     cords={this.state.coordinates}
-                    region={this.state.region}
+                    step={this.state.steps}
                 />
+
                 {this.watchUserLocation()}
             </Container>
         )
