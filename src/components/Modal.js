@@ -11,6 +11,7 @@ class LoginModal extends Component {
         password: ""
     };
 
+
     setModalVisible(visible) {
         this.setState({ modalVisible: visible });
     }
@@ -30,7 +31,7 @@ class LoginModal extends Component {
                         <Header>
                             <Left>
                                 <Button transparent onPress={() => this.setModalVisible(!this.state.modalVisible)}>
-                                <Icon name="close" size={30} />
+                                    <Icon name="close" size={30} />
                                 </Button>
                             </Left>
                             <Title>Log In!</Title>
@@ -59,7 +60,7 @@ class LoginModal extends Component {
                                 email.trim()
                                 password.trim()
                                 Auth(email, password, "signIn", () => this.setModalVisible(!this.state.modalVisible));
-                            } }>
+                            }}>
                                 <Text>Sign In</Text>
                             </Button>
                         </Form>
@@ -70,15 +71,15 @@ class LoginModal extends Component {
 
                 <Button full block info onPress={() => this.setModalVisible(true)}>
                     <Text
-                    style={{justifyContent: 'center'}}
-                    TextToShow={this.props.TextToShow}
+                        style={{ justifyContent: 'center' }}
+                        TextToShow={this.props.TextToShow}
                     >
-                      {this.props.TextToShow}
-                      
+                        {this.props.TextToShow}
+
                     </Text>
                 </Button>
-                
-                
+
+
 
             </Container>
         );
