@@ -4,6 +4,7 @@ import { StyleSheet } from 'react-native';
 import ActionButton from 'react-native-action-button';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { OverallOrder, Money, History } from './helpers'
+import Payment from "../payment/Payment";
 import Modal from './Modal'
 
 
@@ -17,6 +18,7 @@ class Button extends Component {
         this.setState({ isModalVisible: !this.state.isModalVisible });
 
     showThisModal(button) {
+        console.log("Hello from show")
         if (button === 'Today') {
             return (
                 <Modal color='#097CB9' toggleModal={this._toggleModal} isModalVisible={this.state.isModalVisible}>
@@ -36,6 +38,15 @@ class Button extends Component {
                 <Modal color='#1abc9c' toggleModal={this._toggleModal} isModalVisible={this.state.isModalVisible}>
                     <History />
                 </Modal>
+            )
+        }
+        else if (button === "Payment") {
+            console.log("hello payment")
+            return (
+                <Modal color='#3498db' toggleModal={this._toggleModal} isModalVisible={this.state.isModalVisible}>
+                <Payment />
+                </Modal>
+
             )
         }
     }
@@ -63,7 +74,9 @@ class Button extends Component {
                 <ActionButton.Item buttonColor='#1abc9c' title="History" onPress={() => this.chosenButton("History")}>
                     <Icon name="md-done-all" style={styles.actionButtonIcon} />
                 </ActionButton.Item>
-
+                <ActionButton.Item buttonColor='#3498db' title="Payment" onPress={() => this.chosenButton("Payment")}>
+                    <Icon name="md-card" style={styles.actionButtonIcon} />
+                </ActionButton.Item>
             </ActionButton>
 
 

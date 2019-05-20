@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { TouchableOpacity, ScrollView } from 'react-native';
-import { Button, Text, View, Title, Subtitle } from 'native-base';
+import { Button, Text, View, Title } from 'native-base';
 import moment from 'moment-timezone';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import Alert from "../../Alert";

@@ -60,6 +60,9 @@ class HomePage extends Component {
   }
   componentDidMount() {
     permission()
+
+   
+
   }
   componentWillMount() {
     this.wasDriverReadyToDrive()

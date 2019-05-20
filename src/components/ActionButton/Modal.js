@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import { TouchableOpacity, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import Modal from "react-native-modal";
-import { Text, Title, View, } from "native-base";
+import { View } from "native-base";
 import Icon from 'react-native-vector-icons/Ionicons';
 
 

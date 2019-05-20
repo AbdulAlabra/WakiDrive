@@ -3,6 +3,9 @@ package com.wakidrive;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.reactnativecommunity.webview.RNCWebViewPackage;
+import com.pusherman.networkinfo.RNNetworkInfoPackage;
+import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import io.invertase.firebase.RNFirebasePackage;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
@@ -29,6 +32,9 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNCWebViewPackage(),
+            new RNNetworkInfoPackage(),
+            new RNDeviceInfo(),
             new RNFirebasePackage(),
             new ReactNativeConfigPackage(),
             new AsyncStoragePackage(),
