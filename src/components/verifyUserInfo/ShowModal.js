@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View } from "react-native"
 import PhoneNumber from './PhoneNumberVerify'
 import Email from "./Email"
+import Address from './Address'
 import isVerified from "./verifiyUser"
 
 class ShowModal extends Component {
@@ -30,10 +31,12 @@ class ShowModal extends Component {
             return <PhoneNumber />
         }
         else if (status === "email") {
-            return <Email />
+            return  <Address />
+            //  <Email /> this should be like that
         }
         else {
-            return null
+
+            return <Address /> 
         }
     }
     render() {

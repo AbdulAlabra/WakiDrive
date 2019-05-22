@@ -1,4 +1,4 @@
-// Optional: Flow type
+
 import React, { Component } from 'react';
 import { Container } from 'native-base';
 import RNFirebase from 'react-native-firebase';
@@ -71,6 +71,7 @@ export default class Notification extends Component {
                                 this.checkOrders();
                             }
                             else {
+                                // you may want to uncomment this to let the user know when they are not ready to drive
                                 this.showAlert("Do not miss any order", "turn on the button", false);
                             }
                         })

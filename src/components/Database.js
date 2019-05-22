@@ -28,8 +28,12 @@ const AddUser = (userId, firstName, lastName, phone, email, password, token) => 
                 completedOrders: {
                     totalOrders: 0,
                     totalMoneyMade: 0
-
                 },
+                payment: {
+                    paid: false,
+                    notPaid: false,
+                    paymentToDriver: false
+                }
             }
         }
     ).then(res => {
@@ -42,6 +46,7 @@ const AddUser = (userId, firstName, lastName, phone, email, password, token) => 
         localStorage.storeData("@canDrive", false);
         localStorage.storeData("@phoneVerified", false);
         localStorage.storeData("@emailVerified", false);
+        localStorage.storeData("@addressVerified", false);
         console.log('SUCCESS');
 
         // Alert("SUCCESS", "account created", () => console.log('ok'), () => console.log('ok'))

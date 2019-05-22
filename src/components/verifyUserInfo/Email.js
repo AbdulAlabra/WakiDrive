@@ -200,7 +200,7 @@ class Email extends Component {
                                 if (mustLogIn) {
                                     this.login()
                                 }
-                                else {
+                                else {  
                                     this.updateEmailAssurance();
                                 }
                             } else {

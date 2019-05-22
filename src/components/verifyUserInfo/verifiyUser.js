@@ -14,10 +14,21 @@ const veriifyUser = () => {
 
                         if (phoneVerified) {
                             return localStorage.retrieveData("@emailVerified").then((emailVerified) => {
-                                console.log(" emailVerified:" + emailVerified )
+                                console.log(" emailVerified:" + emailVerified)
 
                                 if (emailVerified) {
-                                    return 'verified'
+                                    return localStorage.retrieveData('@addressVerified').then(addressVerified => {
+                                        console.log(addressVerified + ": addressVerified");
+                                        if (addressVerified) {
+                                            return 'verified'
+                                        }
+                                        else {
+                                            return 'address'
+                                        }
+                                    }).catch(err => {
+                                        console.log(err);
+                                        return false
+                                    })
                                 }
                                 else {
                                     return 'email'

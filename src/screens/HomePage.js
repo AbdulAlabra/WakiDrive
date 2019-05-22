@@ -42,7 +42,6 @@ class HomePage extends Component {
     localStorage.retrieveData('@isReadyToDrive')
       .then(res => {
         if (res) {
-          console.log('Was Driver Ready to drive ' + res)
           //this means the driver was on ReadyToDrive State
           this.setState({ rightIconColor: '#58D68D', readyToDrive: res })
           this.setState({ checkOrder: false })
@@ -53,16 +52,12 @@ class HomePage extends Component {
             rightIconColor: '#E74C3C',
             readyToDrive: res
           });
-          console.log('Was Driver Ready to drive ' + res)
         }
       })
       .catch(err => console.log(err))
   }
   componentDidMount() {
     permission()
-
-   
-
   }
   componentWillMount() {
     this.wasDriverReadyToDrive()
@@ -80,6 +75,7 @@ class HomePage extends Component {
       isReadyToDrive(x);
     }
   }
+  
   isReadyToDrive2() {
     this.setState({ isOpen: false })
 

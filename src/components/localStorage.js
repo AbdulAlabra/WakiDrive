@@ -15,7 +15,6 @@ var CRUD = {
     },
 
     storeData: async (key, value) => {
-
         try {
 
             await AsyncStorage.setItem(key, JSON.stringify(value), () => {
