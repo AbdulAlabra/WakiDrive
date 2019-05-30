@@ -1,1 +1,1 @@
-../../../FirebaseAuth/Firebase/Auth/Source/Storage/FIRAuthUserDefaultsStorage.h
+../../../FirebaseAuth/Firebase/Auth/Source/FIRAuthUserDefaultsStorage.h

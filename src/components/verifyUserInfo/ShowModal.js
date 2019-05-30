@@ -5,6 +5,7 @@ import Email from "./Email"
 import Address from './Address'
 import isVerified from "./verifiyUser"
 
+import Payment from "./Payment"
 class ShowModal extends Component {
     state = {
         status: "",
@@ -22,21 +23,32 @@ class ShowModal extends Component {
                 console.log(err);
             })
     }
+    componentDidUpdate() {
+        console.log("I updated")
+    }
+
+
+
     _toggleModal = () =>
-    this.setState({ isModalVisible: !this.state.isModalVisible });
+        this.setState({ isModalVisible: !this.state.isModalVisible });
 
     show() {
         const { status } = this.state
         if (status === "phone") {
-            return <PhoneNumber />
+            return <PhoneNumber onComplete={() => this.verify()}
+            />
         }
         else if (status === "email") {
-            return  <Address />
+            return <Email onComplete={() => this.verify()}
+            />
             //  <Email /> this should be like that
         }
+        else if (status === "address") {
+            return <Address onComplete={() => this.verify()} />
+        }
         else {
-
-            return <Address /> 
+            console.log("payment should run ")
+            return <Payment />
         }
     }
     render() {
@@ -44,7 +56,7 @@ class ShowModal extends Component {
             <View>
                 {this.show()}
             </View>
-            );
+        );
     }
 }
 

@@ -20,10 +20,14 @@
 
 @implementation AppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (BOOL)application:(UIApplication *)application
+
+didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   NSString *apiUrl = [ReactNativeConfig envFor:@"GOOGLE_KEY"];
     +  [GMSServices provideAPIKey:apiUrl];
+  //the next line is added to by dynamic links
+  
   [FIRApp configure];
   [[UNUserNotificationCenter currentNotificationCenter] setDelegate:self];
   [RNFirebaseNotifications configure];

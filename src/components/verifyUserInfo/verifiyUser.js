@@ -1,6 +1,5 @@
 import localStorage from '../localStorage'
 
-
 const veriifyUser = () => {
     return localStorage.retrieveData("@account").then((account) => {
         console.log("account :" + account)
@@ -20,6 +19,7 @@ const veriifyUser = () => {
                                     return localStorage.retrieveData('@addressVerified').then(addressVerified => {
                                         console.log(addressVerified + ": addressVerified");
                                         if (addressVerified) {
+
                                             return 'verified'
                                         }
                                         else {

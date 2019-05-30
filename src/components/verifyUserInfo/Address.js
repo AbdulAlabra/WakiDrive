@@ -44,42 +44,27 @@ class Address extends Component {
         this.setState({ isModalVisible: !this.state.isModalVisible });
     componentWillMount() {
         // Un comment this for production
-        /*
-                localStorage.retrieveData("@driverID")
-                    .then(driverID => {
-                        if (driverID) {
-        
-                            this.setState({ isModalVisible: true })
-                            navigator.geolocation.getCurrentPosition(location => {
-        
-                                let userLocation = {
-                                    latitude: location.coords.latitude,
-                                    longitude: location.coords.longitude
-                                }
-                                this.createToken(userLocation)
-        
-                            }, (err) => {
-                                console.log(err)
-                            })
+        localStorage.retrieveData("@driverID")
+            .then(driverID => {
+                if (driverID) {
+
+                    this.setState({ isModalVisible: true })
+                    navigator.geolocation.getCurrentPosition(location => {
+
+                        let userLocation = {
+                            latitude: location.coords.latitude,
+                            longitude: location.coords.longitude
                         }
-                        else {
-                            return
-                        }
+                        this.createToken(userLocation)
+
+                    }, (err) => {
+                        console.log(err)
                     })
-                    */
-        navigator.geolocation.getCurrentPosition(location => {
-
-            let userLocation = {
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude
-            }
-            this.createToken(userLocation)
-            this.setState({ isModalVisible: true })
-
-
-        }, (err) => {
-            console.log(err)
-        })
+                }
+                else {
+                    return
+                }
+            })
     }
 
     createToken(userLocation) {
@@ -146,8 +131,7 @@ class Address extends Component {
         localStorage.retrieveData("@driverID")
             .then(driverID => {
                 // change this line in production
-                let dID = (driverID === undefined) ? '4XKEgv1yPUTkoNHmqmbQPK8qmJj2' : driverID
-                firebase.database().ref(`drivers/registeredDrivers/${dID}/driverInfo/address`).update({
+                firebase.database().ref(`drivers/registeredDrivers/${driverID}/driverInfo/address`).update({
                     city,
                     street,
                     postalCode,
@@ -169,19 +153,33 @@ class Address extends Component {
             })
     }
     done() {
-        // un comment tis when you are ready to use this component
-        // localStorage.storeData("@addressVerified", true)
-        // .then(res => {
-        //     Alert("You Are All Set")
-        // })  
-        // .catch(err => {
-        //     console.log(err)
-        // })
-        Alert(
-            "Done", "You are all set!",
-            () => this.setState({ isModalVisible: false }),
-            () => this.setState({ isModalVisible: false })
-        )
+        localStorage.storeData("@addressVerified", true)
+            .then(res => {
+                if (res) {
+                    Alert(
+                        "Done", "You are all set!",
+                        () => {
+                            this.setState({ isModalVisible: false })
+                            this.props.onComplete()
+                        },
+                        () => {
+                            this.setState({ isModalVisible: false })
+                            this.props.onComplete()
+                        }
+                    )
+                }
+                else {
+                    Alert(
+                        "Something went wrong", "Try Again Later",
+                        () => console.log("ok"),
+                        () => console.log('cancel')
+                    )
+                }
+            })
+            .catch(err => {
+                console.log(err)
+            })
+
     }
     validateForm() {
         const { Neighborhood, city, postalCode, Building, street } = this.state
@@ -537,7 +535,7 @@ class Map extends Component {
                 latitude: this.state.userLocation.latitude,
                 longitude: this.state.userLocation.longitude
             }
-            
+
             let cords = (this.state.region === null) ? userLocation : (this.state.marker !== null) ? this.state.marker : this.state.region
             marker = <Marker
                 coordinate={cords}
@@ -683,7 +681,7 @@ const styles = StyleSheet.create({
     },
     result: {
     },
-    
+
 
 })
 export default Address

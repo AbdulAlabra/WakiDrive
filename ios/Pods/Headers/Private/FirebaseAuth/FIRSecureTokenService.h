@@ -1,1 +1,1 @@
-../../../FirebaseAuth/Firebase/Auth/Source/SystemService/FIRSecureTokenService.h
+../../../FirebaseAuth/Firebase/Auth/Source/FIRSecureTokenService.h

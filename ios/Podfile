@@ -1,6 +1,7 @@
 # Uncomment the next line to define a global platform for your project
 platform :ios, '9.0'
 
+
 target 'WakiDrive' do
     rn_path = '../node_modules/react-native'
     rn_maps_path = '../node_modules/react-native-maps'
@@ -40,13 +41,11 @@ target 'WakiDrive' do
     pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
     pod 'Firebase/Core'
     pod 'Firebase/Messaging'
-    pod "Firebase/Auth"
+    pod "Firebase/Auth", '~> 6.0.0'
     pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
     pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
     pod 'react-native-network-info', :path => '../node_modules/react-native-network-info'
-
     pod 'react-native-webview', :path => '../node_modules/react-native-webview'
-
     # target 'WakiDriveTests' do
     #   inherit! :search_paths
     #   # Pods for testing

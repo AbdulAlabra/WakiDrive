@@ -54,7 +54,14 @@ class Email extends Component {
                     }).then(() => {
                         console.log("done");
                         localStorage.storeData("@emailVerified", true)
-                        this.setState({ isConfirmed: true })
+                        .then(res => {
+                            this.setState({ isConfirmed: true })
+                            this.props.onComplete()
+
+                        })
+                        .catch(err => {
+                            console.log(err)
+                        })
 
                     }).catch(err => {
                         console.log(err);

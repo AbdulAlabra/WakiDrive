@@ -10,7 +10,6 @@ import Alert from '../components/Alert'
 import isReadyToDrive from '../components/isReadyToDrive'
 import ActionButton from "../components/ActionButton/ActionButton"
 import Verify from "../components/verifyUserInfo/ShowModal"
-
 class HomePage extends Component {
   static navigationOptions = {
     header: null
@@ -164,8 +163,6 @@ class HomePage extends Component {
             }}
           />
           <ActionButton />
-      
-        
           <Verify />
         </Container>
       </SideMenu>

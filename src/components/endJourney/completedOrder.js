@@ -2,7 +2,7 @@ import firebase from "../Firebase"
 import localStorage from "../localStorage"
 import moment from 'moment-timezone';
 import updateLocalStorage from './updateLocalStorage'
-
+import updatePayment from '../payment/updatePayment'
 const db = firebase.database();
 
 const addCompletedOrder = (driverID, assignedAt, orderRefrence, orderID) => {
@@ -25,7 +25,19 @@ const addCompletedOrder = (driverID, assignedAt, orderRefrence, orderID) => {
                     if (isDone) {
                         return removeOrderLisner(driverID, orderID)
                             .then(() => {
-                                return updateLocalStorage();
+                                return updatePayment()
+                                    .then(paymentIsAdded => {
+                                        if (paymentIsAdded) {
+                                            return updateLocalStorage();
+                                        }
+                                        else {
+                                            return false
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.log(err)
+                                        return false
+                                    })
                             })
                     }
                     else {
@@ -60,7 +72,7 @@ const updateTotalMoeny = (driverID) => {
                 })
                 .catch(err => {
                     console.log(err)
-                    return err
+                    return false
                 })
         })
         .catch(err => {

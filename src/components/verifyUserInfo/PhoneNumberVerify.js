@@ -73,8 +73,14 @@ class VerifyPhoneNumber extends Component {
                         phone: this.state.countryCode + this.state.phoneNumber
                     }).then(() => {
                         console.log("done");
-                        localStorage.storeData("@phoneVerified", true);
-                        this.setState({ isConfirmed: true })
+                        localStorage.storeData("@phoneVerified", true)
+                            .then(res => {
+                                this.setState({ isConfirmed: true })
+                                this.props.onComplete()
+                            })
+                            .catch(err => {
+                                console.log(err)
+                            })
 
                     }).catch(err => {
                         console.log(err);

@@ -15,6 +15,7 @@ import currentDestination from '../orders/currentDestination'
 import moment from "moment-timezone"
 import readyToDrive from "../isReadyToDrive"
 import polylineChecker from "../RedirectUserLocation"
+import updateOrderStatus from "../orders/updateUnfulfilledOrders"
 
 export default class Notification extends Component {
 
@@ -238,7 +239,7 @@ export default class Notification extends Component {
     onPressCancel(orderID, orderRefrence) {
         this.setState({ isAlertOpen: false })
         if (this.state.pressCanceled === 1) {
-            this.showAlert('Order Canceled', "You Will band you for sometime", false);            
+            this.showAlert('Order Canceled', "You Will band you for sometime", false);
             cancelOrder(orderRefrence, orderID)
         }
         else {
@@ -256,16 +257,19 @@ export default class Notification extends Component {
             let order = res.val();
             let stores = order.stores
             let buyerLocation = order.BuyerLocation
+            let BuyerInfo = order.BuyerInfo
             navigator.geolocation.getCurrentPosition(location => {
-                let lat = location.coords.latitude;
-                let lang = location.coords.longitude;
-                let driver = `${lat},${lang}`
+
+                let startingLocation = {
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude
+                }
+                let driver = `${startingLocation.latitude},${startingLocation.longitude}`
 
                 sortStores(driver, stores)
                     .then(sortedKeys => {
                         if (sortedKeys) {
-                            console.log(sortedKeys);
-                            this.saveOrderLocally(stores, buyerLocation, orderRef, sortedKeys, orderID);
+                            this.saveOrderLocally(stores, buyerLocation, BuyerInfo, orderRef, startingLocation, sortedKeys, orderID);
                         }
 
                     })
@@ -277,7 +281,7 @@ export default class Notification extends Component {
         })
     }
     // #6
-    saveOrderLocally(stores, buyerLocation, orderRef, sortedStoresKey, orderID) {
+    saveOrderLocally(stores, buyerLocation, BuyerInfo, orderRef, startingLocation, sortedStoresKey, orderID) {
         let assignedAt = moment().tz('Asia/Riyadh').format('YYYY-MM-DDTHH:mm:ss')
         let order = {
             pickedOrders: [],
@@ -286,18 +290,29 @@ export default class Notification extends Component {
             orderRef,
             orderID,
             sortedStoresKey,
-            assignedAt
+            assignedAt,
+            BuyerInfo,
+            startingLocation
         }
         //save overall order
         localStorage.storeData("@order", order)
             .then(response => {
                 let closestStoreKey = response.sortedStoresKey[0];
                 let store = response.stores[closestStoreKey];
+
                 console.log(response);
                 //save current destination/store
                 localStorage.storeData('@currentOrder', store)
                     .then(chosenStore => {
+
                         this.route()
+                        updateOrderStatus("order accepted")
+                            .then(res => {
+                                console.log("resssssss: " + res)
+                            })
+                            .catch(err => {
+                                console.log(err)
+                            })
                     })
                     .catch(err => {
                         console.log(err);

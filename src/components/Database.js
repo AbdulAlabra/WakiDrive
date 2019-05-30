@@ -1,8 +1,7 @@
-import React from 'react'
+
 import firebase from './Firebase';
 import localStorage from './localStorage'
-import Alert from "./Alert"
-import Modal from './Modal'
+
 
 const AddUser = (userId, firstName, lastName, phone, email, password, token) => {
     firebase.database().ref(`drivers/registeredDrivers/${userId}`).set(
@@ -20,6 +19,18 @@ const AddUser = (userId, firstName, lastName, phone, email, password, token) => 
                 model: false,
                 phoneVerified: false,
                 emailVerified: false,
+                restrictions: {
+                    isRestricted: false,
+                    reason: {
+                        type: false,
+                        message: false,
+                        issuedDate: false,
+                        isResolved: false,
+                        resolvedDate: false,
+                        references: false
+                    },
+                    resolvedRrestrictions: false
+                }
             },
             driverHistory: {
                 canceledOrders: {
@@ -30,9 +41,26 @@ const AddUser = (userId, firstName, lastName, phone, email, password, token) => 
                     totalMoneyMade: 0
                 },
                 payment: {
-                    paid: false,
-                    notPaid: false,
-                    paymentToDriver: false
+                    paid: {
+                        total: 0
+                    },
+                    notPaid: {
+                        current: {
+                            total: 0
+                        },
+                        PayPage: false,
+                        overallTotal: 0,
+
+                    },
+                    paymentToDriver: {
+                        current: {
+                            total: 0,
+                        },
+                        overallTotal: 0,
+                        PayPage: false,
+
+                    }
+
                 }
             }
         }
@@ -42,7 +70,7 @@ const AddUser = (userId, firstName, lastName, phone, email, password, token) => 
         localStorage.storeData('@driverID', driverID)
         localStorage.storeData('@account', true);
         localStorage.storeData("@isSignedIn", true);
-        
+
         localStorage.storeData("@canDrive", false);
         localStorage.storeData("@phoneVerified", false);
         localStorage.storeData("@emailVerified", false);

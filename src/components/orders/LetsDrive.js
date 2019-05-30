@@ -17,6 +17,7 @@ const LetsDrive = (driverID) => {
         })
         .catch(err => console.log(err));
 }
+
 const updateCurrentDelivery = () => {
 
     // localStorage.storeData("@currentOrder", true);

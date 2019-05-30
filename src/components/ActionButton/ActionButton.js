@@ -14,11 +14,13 @@ class Button extends Component {
         isModalVisible: false,
         button: ""
     };
+    
+
     _toggleModal = () =>
         this.setState({ isModalVisible: !this.state.isModalVisible });
 
     showThisModal(button) {
-        console.log("Hello from show")
+
         if (button === 'Today') {
             return (
                 <Modal color='#097CB9' toggleModal={this._toggleModal} isModalVisible={this.state.isModalVisible}>
@@ -47,7 +49,11 @@ class Button extends Component {
                 <Payment />
                 </Modal>
 
+
             )
+        }
+        else {
+            return null
         }
     }
 
