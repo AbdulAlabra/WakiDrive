@@ -23,9 +23,7 @@ class ShowModal extends Component {
                 console.log(err);
             })
     }
-    componentDidUpdate() {
-        console.log("I updated")
-    }
+   
 
 
 
@@ -47,7 +45,7 @@ class ShowModal extends Component {
             return <Address onComplete={() => this.verify()} />
         }
         else {
-            console.log("payment should run ")
+
             return <Payment />
         }
     }

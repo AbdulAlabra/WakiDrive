@@ -3,6 +3,8 @@ package com.wakidrive;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import io.realm.react.RealmReactPackage;
+import com.jamesisaac.rnbackgroundtask.BackgroundTaskPackage;
 import com.reactnativecommunity.webview.RNCWebViewPackage;
 import com.pusherman.networkinfo.RNNetworkInfoPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
@@ -32,6 +34,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RealmReactPackage(),
+            new BackgroundTaskPackage(),
             new RNCWebViewPackage(),
             new RNNetworkInfoPackage(),
             new RNDeviceInfo(),
@@ -59,5 +63,6 @@ public class MainApplication extends Application implements ReactApplication {
   public void onCreate() {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
+    BackgroundTaskPackage.useContext(this);
   }
 }

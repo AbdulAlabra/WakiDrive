@@ -84,7 +84,7 @@ const readyToDrive = (status) => {
                     .then(() => console.log('driver is ready to drive'))
                     .catch(err => console.log(err));
                 // end of set
-            }); //end of location
+            }, err => console.log(err), { maximumAge: 0, enableHighAccuracy:true }); //end of location
         }); // end of registeredDrivers
     }
 

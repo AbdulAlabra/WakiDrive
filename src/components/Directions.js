@@ -42,10 +42,11 @@ export const distance = (origin, destination) => {
 
 
 export const directions = (origin, destination) => {
-    return fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=${APIkey}`)
+    return fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=${APIkey}&provideRouteAlternatives=true`)
         .then(res => {
+            
             return res.json().then(result => {
-
+                    
                 const steps = result.routes[0].legs[0].steps
                 console.log(steps);
                 console.log(result);

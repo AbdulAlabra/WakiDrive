@@ -154,7 +154,6 @@ class HomePage extends Component {
           <Notification
             readyToDrive={this.state.checkOrder}
             nextTripAccepted={this.state.nextTripAccepted}
-            // journey={(x) => this.testProps(x)}
             testFun={(x) => {
               let redColor = '#E74C3C';
               if (x === "red" && this.state.rightIconColor !== redColor) {

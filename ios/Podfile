@@ -41,11 +41,13 @@ target 'WakiDrive' do
     pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
     pod 'Firebase/Core'
     pod 'Firebase/Messaging'
-    pod "Firebase/Auth", '~> 6.0.0'
+    pod "Firebase/Auth"
     pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
     pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
     pod 'react-native-network-info', :path => '../node_modules/react-native-network-info'
     pod 'react-native-webview', :path => '../node_modules/react-native-webview'
+    pod 'RNBackgroundFetch', :path => '../node_modules/react-native-background-fetch'
+
     # target 'WakiDriveTests' do
     #   inherit! :search_paths
     #   # Pods for testing

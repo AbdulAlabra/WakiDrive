@@ -57,6 +57,8 @@ const isDriverOnPolyLine = async (step) => {
         // console.log("__________________________")  // to 
 
         if (closestPoint.distance >= 50) {
+
+            
             return "redirect"
         }
         else {

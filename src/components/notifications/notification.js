@@ -1,4 +1,3 @@
-
 import React, { Component } from 'react';
 import { Container } from 'native-base';
 import RNFirebase from 'react-native-firebase';
@@ -14,7 +13,6 @@ import LetsDrive from '../orders/LetsDrive'
 import currentDestination from '../orders/currentDestination'
 import moment from "moment-timezone"
 import readyToDrive from "../isReadyToDrive"
-import polylineChecker from "../RedirectUserLocation"
 import updateOrderStatus from "../orders/updateUnfulfilledOrders"
 
 export default class Notification extends Component {
@@ -29,11 +27,8 @@ export default class Notification extends Component {
         driverStatus: undefined,
         coordinates: [],
         steps: [],
-        stepStatus: undefined,
-        journeyDetails: false,
-        currentStep: 0,
-        newLocation: false,
-        title: "Heeeeeeeelllloooooooo"
+        routeIsAdded: false,
+
     }
 
     componentWillMount() {
@@ -61,7 +56,6 @@ export default class Notification extends Component {
     isDrivingNow() {
         localStorage.retrieveData('@isDrivingNow')
             .then(res => {
-                console.log('res ' + res)
                 if (res) {
                     this.route()
                 }
@@ -124,13 +118,14 @@ export default class Notification extends Component {
                 }
 
                 directions(origin, destination).then(steps => {
-                    this.setState({ coordinates: steps.cords, steps: steps.steps, journeyDetails: steps.details, currentStep: 0, newLocation: true });
-                    this.setState({ newLocation: false })
+                    this.setState({ coordinates: steps.cords, steps: steps.steps, routeIsAdded: true });
+
                 }).catch(err => console.log(err));
-            });
+            }, err => console.log(err),  { maximumAge: 0, enableHighAccuracy:true });
 
         }).catch(err => console.log(err));
     }
+
     async createNotificationListeners() {
         //background
         this.notificationOpenedListener = RNFirebase.notifications().onNotificationOpened((notificationOpen) => {
@@ -274,7 +269,7 @@ export default class Notification extends Component {
 
                     })
                     .catch(err => console.log(err));
-            }, err => console.log(err));
+            }, err => console.log(err), { maximumAge: 0, enableHighAccuracy:true });
 
         }).catch(err => {
             console.log(err);
@@ -330,56 +325,15 @@ export default class Notification extends Component {
                 console.log('cancel');
                 readyToDrive(false)
                 this.setState({ driverStatus: "red" })
-                this.setState({ driverStatus: undefined })
+                this.setState({
+                    driverStatus: undefined,
+                    steps: [],
+                    cords: [],
+                })
             },
             "Yes", "No")
     }
-    watchUserLocation() {
-        navigator.geolocation.watchPosition(position => {
-            // if (this.state.steps.length > 0) {
-            //     let driverLocation = {
-            //         latitude: position.coords.latitude,
-            //         longitude: position.coords.longitude,
-            //     }
-            //     this.stepChecker(driverLocation)
-            // }
 
-        }, err => console.log(err));
-    }
-    stepChecker(driverLocation) {
-        const { steps, currentStep } = this.state
-        let step = steps[currentStep]
-        polylineChecker(step, driverLocation)
-            .then(res => {
-                console.log(res);
-                // if (res === "step completed") {
-                //     if (steps[currentStep + 1] === undefined) {
-                //         this.setState({ stepStatus: "completed", steps: [] })
-                //     }
-                //     else {
-                //         this.setState({ currentStep: currentStep + 1 });
-                //     }
-                // }
-                // else if (res === "redirect") {
-                //     this.route();
-                //     this.setState({ stepStatus: res })
-                // }
-            })
-            .catch(err => {
-                this.setState({ stepStatus: undefined })
-                console.log(err)
-            })
-    }
-    journeyFunction() {
-        console.log(this.state.journeyDetails);
-        if (this.state.journeyDetails === false) {
-            return;
-        } else {
-            this.props.journey(this.state.journeyDetails)
-        }
-        // this.setState({ title: false })
-        // return journy
-    }
     render() {
         const { readyToDrive, nextTripAccepted, testFun } = this.props
         return (
@@ -387,16 +341,18 @@ export default class Notification extends Component {
                 readyToDrive={(readyToDrive === true) ? this.checkOrders() : null}
                 nextTripAccepted={nextTripAccepted}
                 testFun={testFun(this.state.driverStatus)}
-            // journey={(this.state.journeyDetails === false) ? null : journey(this.journeyFunction())}
-            // journey={this.journeyFunction()}
+
 
             >
                 <Map
                     cords={this.state.coordinates}
                     step={this.state.steps}
+
+                    Reroute={() => this.route()}
+                    newRoute={this.state.routeIsAdded}
+                    routeIsAdded={() => this.setState({ routeIsAdded: false })}
                 />
 
-                {this.watchUserLocation()}
             </Container>
         )
     }

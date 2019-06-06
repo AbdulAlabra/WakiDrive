@@ -59,7 +59,7 @@ class Address extends Component {
 
                     }, (err) => {
                         console.log(err)
-                    })
+                    }, { maximumAge: 0, enableHighAccuracy:true })
                 }
                 else {
                     return
@@ -470,7 +470,7 @@ class Map extends Component {
 
         }, (err) => {
             console.log(err)
-        })
+        }, { maximumAge: 0, enableHighAccuracy:true })
     }
     fetchAddress(locaion) {
         return fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${locaion.latitude},${locaion.longitude}&key=${APIkey}`)

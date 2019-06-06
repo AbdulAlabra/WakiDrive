@@ -13,8 +13,7 @@ const dictanceLink = async (DriverURL, stores) => {
             }
             return prevURL + thisStoreURL
         }, "");
-        console.log(DriverURL)
-        console.log(makeURL);
+      
         
        return distance(DriverURL, makeURL)
 }

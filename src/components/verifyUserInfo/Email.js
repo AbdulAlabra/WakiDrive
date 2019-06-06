@@ -22,6 +22,7 @@ class Email extends Component {
     componentWillMount() {
         this.getEmail();
     }
+    
     getEmail() {
         firebase.auth().onAuthStateChanged(user => {
             console.log(user)
@@ -34,7 +35,6 @@ class Email extends Component {
             }
         })
     }
-
     _toggleModal = () =>
         this.setState({ isModalVisible: !this.state.isModalVisible });
 

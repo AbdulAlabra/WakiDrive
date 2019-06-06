@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { View, Button, Text, TextInput, Image } from 'react-native';
-import Pay from '../components/payment/Pay'
 
 
 
@@ -56,7 +55,7 @@ export default class PhoneAuthTest extends Component {
         //     </View>
         // );
         return (
-            <Pay />
-        )
+            <View></View>
+            )
     }
 }

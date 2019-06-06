@@ -140,6 +140,8 @@ android {
 }
 
 dependencies {
+    implementation project(':realm')
+    implementation project(':react-native-background-task')
     implementation project(':react-native-webview')
     implementation project(':react-native-network-info')
     implementation project(':react-native-device-info')
