@@ -18,7 +18,6 @@ export default class OverallOrder extends Component {
     order() {
         check('currentOrder').then(order => {
             if (order) {
-                console.log(order)
                 orderDetails(order)
                     .then(details => {
                         let orderDetails = details.orderDetails

@@ -3,6 +3,7 @@ import localStorage from '../localStorage'
 import delivered from './completedOrder'
 
 
+
 const updateDriverStatus = () => {
 
     return localStorage.retrieveData('@driverID')
@@ -39,8 +40,6 @@ const updateDriverStatus = () => {
         })
 }
 
-const updateLocalStorage = () => {
-    return
-}
+
 
 export default updateDriverStatus

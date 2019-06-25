@@ -13,11 +13,12 @@ const query = () => {
                         let orderRefrence = order.orderRef
                         let paymentMethod = order.BuyerInfo.paymentMethod
                         let startingLocation = order.startingLocation
+                        let cost = order.cost
                         if (paymentMethod === "visa") {
-                            return paymentForDriver(driverID, orderRefrence, paymentMethod, startingLocation)
+                            return paymentForDriver(driverID, orderRefrence, paymentMethod, startingLocation, cost);
                         }
                         else {
-                            return saveNotPaid(driverID, orderRefrence, paymentMethod, startingLocation)
+                            return saveNotPaid(driverID, orderRefrence, paymentMethod, startingLocation, cost);
                         }
                     }
                     else {
@@ -32,15 +33,20 @@ const query = () => {
         })
 }
 
+
+
 // when order is paid by cash on delivery
-const saveNotPaid = (driverID, orderRefrence, paymentMethod, startingLocation) => {
+const saveNotPaid = (driverID, orderRefrence, paymentMethod, startingLocation, costDetails) => {
+    const { driverMoney, currency, commission, deliveryCost } = costDetails.cost
     let time = moment().tz('Asia/Riyadh').format('YYYY-MM-DDTHH:mm:ss');
     return db.ref(`drivers/registeredDrivers/${driverID}/driverHistory/payment/notPaid/current/payments`).push().set({
         time,
-        driverMoney: false,
+        timeZone: "Asia/Riyadh",
+        currency,
+        driverMoney,
+        commission,
+        deliveryCost,
         paymentID: false,
-        commission: false,
-        deliveryCost: false,
         orderRefrence,
         paymentMethod,
         startingLocation
@@ -53,15 +59,19 @@ const saveNotPaid = (driverID, orderRefrence, paymentMethod, startingLocation) =
             return false
         })
 }
+
 // when order is paid by visa
-const paymentForDriver = (driverID, orderRefrence, paymentMethod, startingLocation) => {
+const paymentForDriver = (driverID, orderRefrence, paymentMethod, startingLocation, costDetails) => {
+    const { driverMoney, currency, commission, deliveryCost } = costDetails.cost
     let time = moment().tz('Asia/Riyadh').format('YYYY-MM-DDTHH:mm:ss');
     return db.ref(`drivers/registeredDrivers/${driverID}/driverHistory/payment/paymentToDriver/current/payments`).push().set({
         time,
+        timeZone: "Asia/Riyadh",
+        currency,
+        driverMoney,
+        commission,
+        deliveryCost,
         paymentID: false,
-        driverMoney: false,
-        commission: false,
-        deliveryCost: false,
         orderRefrence,
         paymentMethod,
         startingLocation

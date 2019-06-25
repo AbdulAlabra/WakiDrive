@@ -8,7 +8,7 @@ const readyToDrive = (status) => {
         .then(driverID => {
             if (driverID) {
                 if (status) {
-                     db.ref(`drivers/registeredDrivers/${driverID}`).once('value', function (data) {
+                    db.ref(`drivers/registeredDrivers/${driverID}`).once('value', function (data) {
                         var token = ""
                         localStorage.retrieveData('@fcmToken').then(res => {
                             if (res) {
@@ -53,7 +53,7 @@ const readyToDrive = (status) => {
                                 })
                                 .catch(err => console.log(err));
                             // end of set
-                        }, err => console.log(err), { maximumAge: 0, enableHighAccuracy:true }); //end of location
+                        }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true }); //end of location
                     }); // end of registeredDrivers
                 }
 
@@ -85,7 +85,7 @@ const messege = (body, title) => {
 const saveStatus = (status) => {
 
     localStorage.storeData('@isReadyToDrive', status)
-    .then(res => console.log('Is Driver Ready to drive ' + status))
-    .catch(err => console.log(err));
+        .then(res => console.log('Is Driver Ready to drive ' + status))
+        .catch(err => console.log(err));
 }
 export default readyToDrive

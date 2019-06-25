@@ -65,7 +65,6 @@ class Map extends Component {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
             }
-            console.log(location)
             if (isInitialRegion) {
                 this.setState({ initialRegion: region, location })
             }
@@ -113,14 +112,13 @@ class Map extends Component {
 
 
             if (toLocation === undefined) {
-                console.log("1")
                 let findPoint = polylineCords.find(point => {
                     let center = geolib.getCenter([point.from, point.to])
                     let driverPoint = geolib.isPointInCircle(driverLocation, center, point.distance / 2)
                     return driverPoint === true
                 });
                 if (findPoint === undefined) {
-                    console.log("2")
+
                     stepChecker(this.state.steps[0], driverLocation)
                         .then(res => {
                             if (res === "redirect" && stepStatus !== "redirect") {

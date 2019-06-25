@@ -6,6 +6,14 @@ import Address from './Address'
 import isVerified from "./verifiyUser"
 
 import Payment from "./Payment"
+
+
+/*
+there is an error in this file
+ExceptionsManager.js:82 Warning: Can't perform a React state update on an unmounted component. This is a no-op, but it indicates a memory leak in your application. To fix, cancel all subscriptions and asynchronous tasks in the componentWillUnmount method.
+in ShouldPay (at ShowModal.js:51)
+*/
+
 class ShowModal extends Component {
     state = {
         status: "",
@@ -23,8 +31,6 @@ class ShowModal extends Component {
                 console.log(err);
             })
     }
-   
-
 
 
     _toggleModal = () =>

@@ -3,6 +3,8 @@ import localStorage from "../localStorage"
 import moment from 'moment-timezone';
 import updateLocalStorage from './updateLocalStorage'
 import updatePayment from '../payment/updatePayment'
+import updateDeliveryTracking from "../../request/delivery/updateOrderStatus"
+
 const db = firebase.database();
 
 const addCompletedOrder = (driverID, assignedAt, orderRefrence, orderID) => {
@@ -90,6 +92,7 @@ const orderDetails = () => {
 
             return localStorage.retrieveData('@driverID')
                 .then(driverID => {
+                    tracker(orderRefrence, driverID, "delivered")
                     return addCompletedOrder(driverID, assignedAt, orderRefrence, orderID)
                 })
                 .catch(err => {
@@ -113,6 +116,18 @@ const removeOrderLisner = (driverID, orderID) => {
             console.log(err)
             return false
         })
+}
+
+const tracker = (orderRefrence, driverID, opreation) => {
+    navigator.geolocation.getCurrentPosition(position => {
+        let location = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+        }
+        let latlang = `${location.latitude},${location.longitude}`
+
+        return updateDeliveryTracking(orderRefrence, driverID, opreation, latlang)
+    }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
 }
 
 export default orderDetails

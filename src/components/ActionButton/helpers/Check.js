@@ -3,7 +3,7 @@ import localStorage from '../../localStorage'
 const check = (keySearch) => {
     return localStorage.retrieveData("@" + keySearch)
         .then(res => {
-            console.log(res);
+
             if (res) {
                 return res
             }

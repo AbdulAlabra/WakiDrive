@@ -14,6 +14,8 @@ import currentDestination from '../orders/currentDestination'
 import moment from "moment-timezone"
 import readyToDrive from "../isReadyToDrive"
 import updateOrderStatus from "../orders/updateUnfulfilledOrders"
+import updateDeliveryStatus from "../../request/delivery/updateOrderStatus"
+
 
 export default class Notification extends Component {
 
@@ -73,6 +75,30 @@ export default class Notification extends Component {
                 }
             }).catch(err => console.log(err));
     }
+    updateDeliver(refrence, opreation, orderIndexToUpdate) {
+        return localStorage.retrieveData('@driverID')
+            .then(driverID => {
+                if (driverID) {
+
+                    navigator.geolocation.getCurrentPosition(position => {
+                        let location = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        }
+                        let latlang = `${location.latitude},${location.longitude}`
+                        return updateDeliveryStatus(refrence, driverID, opreation, latlang, orderIndexToUpdate)
+                    }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
+                }
+                else {
+                    return false
+                }
+            })
+            .catch(err => {
+                console.log(err)
+                return false
+            })
+    }
+
     checkOrders() {
         localStorage.retrieveData('@driverID')
             .then(driverID => {
@@ -118,10 +144,16 @@ export default class Notification extends Component {
                 }
 
                 directions(origin, destination).then(steps => {
-                    this.setState({ coordinates: steps.cords, steps: steps.steps, routeIsAdded: true });
+                    if (steps !== "ZERO_RESULTS") {
+                        this.setState({ coordinates: steps.cords, steps: steps.steps, routeIsAdded: true });
+                    }
+                    else {
+                        console.log("Location not found")
+                        this.delivered()
+                    }
 
                 }).catch(err => console.log(err));
-            }, err => console.log(err),  { maximumAge: 0, enableHighAccuracy:true });
+            }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true });
 
         }).catch(err => console.log(err));
     }
@@ -223,13 +255,13 @@ export default class Notification extends Component {
                 }
                 else {
                     this.getOrderDetails(orderRefrence, orderID);
-                    let driverID = firebase.auth().currentUser.uid;
-                    LetsDrive(driverID)
+
                     this.showAlert("Let's drive !", "Be Save & Enjoy ", false);
                 }
             })
             .catch(err => console.log(err));
     }
+
     // #4
     onPressCancel(orderID, orderRefrence) {
         this.setState({ isAlertOpen: false })
@@ -250,9 +282,10 @@ export default class Notification extends Component {
         }).then(res => {
             //order from db ref
             let order = res.val();
-            let stores = order.stores
+            let stores = order.destinations
             let buyerLocation = order.BuyerLocation
             let BuyerInfo = order.BuyerInfo
+            let cost = order.cost
             navigator.geolocation.getCurrentPosition(location => {
 
                 let startingLocation = {
@@ -264,19 +297,20 @@ export default class Notification extends Component {
                 sortStores(driver, stores)
                     .then(sortedKeys => {
                         if (sortedKeys) {
-                            this.saveOrderLocally(stores, buyerLocation, BuyerInfo, orderRef, startingLocation, sortedKeys, orderID);
+                            this.saveOrderLocally(stores, buyerLocation, BuyerInfo, orderRef, startingLocation, sortedKeys, orderID, cost);
                         }
 
                     })
                     .catch(err => console.log(err));
-            }, err => console.log(err), { maximumAge: 0, enableHighAccuracy:true });
+            }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true });
 
         }).catch(err => {
             console.log(err);
         })
     }
+
     // #6
-    saveOrderLocally(stores, buyerLocation, BuyerInfo, orderRef, startingLocation, sortedStoresKey, orderID) {
+    saveOrderLocally(stores, buyerLocation, BuyerInfo, orderRef, startingLocation, sortedStoresKey, orderID, cost) {
         let assignedAt = moment().tz('Asia/Riyadh').format('YYYY-MM-DDTHH:mm:ss')
         let order = {
             pickedOrders: [],
@@ -287,12 +321,14 @@ export default class Notification extends Component {
             sortedStoresKey,
             assignedAt,
             BuyerInfo,
-            startingLocation
+            startingLocation,
+            cost
         }
         //save overall order
         localStorage.storeData("@order", order)
             .then(response => {
                 let closestStoreKey = response.sortedStoresKey[0];
+                this.updateDeliver(order.orderRef, "omw", closestStoreKey)
                 let store = response.stores[closestStoreKey];
 
                 console.log(response);
@@ -303,6 +339,8 @@ export default class Notification extends Component {
                         this.route()
                         updateOrderStatus("order accepted")
                             .then(res => {
+                                let driverID = firebase.auth().currentUser.uid;
+                                LetsDrive(driverID, order)
                                 console.log("resssssss: " + res)
                             })
                             .catch(err => {
@@ -356,4 +394,5 @@ export default class Notification extends Component {
             </Container>
         )
     }
+
 }

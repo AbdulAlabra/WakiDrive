@@ -1,13 +1,14 @@
 import localStorage from '../localStorage'
 import firebase from '../Firebase'
 
-const LetsDrive = (driverID) => {
+const LetsDrive = (driverID, order) => {
     let db = firebase.database();
     db.ref(`drivers/readyToDrive/${driverID}`).once('value', snapshot => {
 
     })
         .then((result) => {
-            const data = result.val();
+            let data = result.val();
+            data.order = order
             db.ref(`drivers/drivingNow/${driverID}`).set(data)
                 .then(() => {
                     localStorage.storeData("@isDrivingNow", true);
@@ -18,11 +19,7 @@ const LetsDrive = (driverID) => {
         .catch(err => console.log(err));
 }
 
-const updateCurrentDelivery = () => {
 
-    // localStorage.storeData("@currentOrder", true);
-
-}
 
 
 

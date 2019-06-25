@@ -4,7 +4,7 @@ import arrivalValidation from './validateTime';
 import orderDetails from './orderDetails';
 import end from '../endJourney/end'
 import orderPickedUp from './orderPickedUp'
-
+import update from "../../request/delivery/updateOrderStatus"
 const pickNextStore = () => {
     return localStorage.retrieveData('@isDrivingNow')
         .then((isDrivingNow) => {
@@ -45,6 +45,7 @@ const getOverallOrder = () => {
         .then((order) => {
             let orders = order.sortedStoresKey;
             let pickedOrderKey = orders[0];
+            
             orders.shift()
             let orderToPick = orders[0]
             let store = order.stores[orderToPick];
@@ -54,6 +55,9 @@ const getOverallOrder = () => {
                 if (pickedOrderKey !== undefined) {
                     order.pickedOrders.push(pickedOrderKey);
                     let buyerLocation = order.buyerLocation;
+                    console.log("Time to go to buyer " + pickedOrderKey)
+                    updateDeliveryStatus(order.orderRef, "picked-up", pickedOrderKey)
+                    updateDeliveryStatus(order.orderRef, "end-user")
                     console.log('Time To Go TO THE BUYER')
                     return saveOrder(order, buyerLocation)
                 }
@@ -75,6 +79,9 @@ const getOverallOrder = () => {
                 }
             }
             else {
+                console.log("hiiii " + pickedOrderKey)
+                updateDeliveryStatus(order.orderRef, "picked-up", pickedOrderKey)
+                updateDeliveryStatus(order.orderRef, "omw", orderToPick)
                 order.pickedOrders.push(pickedOrderKey);
                 return saveOrder(order, store)
             }
@@ -127,5 +134,39 @@ const saveOrder = (overallOrder, currentOrder) => {
 const messege = (title, body) => {
     Alert(title, body, () => console.log('ok'), () => console.log('cancel'));
 }
+
+
+const updateDeliveryStatus = (refrence, opreation, orderIndex) => {
+    localStorage.retrieveData("@driverID")
+        .then(driverID => {
+            if (driverID) {
+                return navigator.geolocation.getCurrentPosition(position => {
+                    let location = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    }
+                    let latlang = `${location.latitude},${location.longitude}`
+
+                    return update(refrence, driverID, opreation, latlang, orderIndex)
+                        .then(result => {
+                            return result
+                        })
+                        .catch(err => {
+                            console.log(err)
+                            return false
+                        })
+                }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
+
+            }
+            else {
+                return false
+            }
+        })
+        .catch(err => {
+            console.log(err)
+            return false
+        })
+}
+
 
 export default pickNextStore

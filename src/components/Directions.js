@@ -44,28 +44,33 @@ export const distance = (origin, destination) => {
 export const directions = (origin, destination) => {
     return fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=${APIkey}&provideRouteAlternatives=true`)
         .then(res => {
-            
+
             return res.json().then(result => {
-                    
-                const steps = result.routes[0].legs[0].steps
-                console.log(steps);
+
                 console.log(result);
-                const journey = result.routes[0].legs[0];
-                const duration = journey.duration;
-                const distance = journey.distance
-                const durationValue = Math.ceil(journey.duration.value / 60)
-                const overview_polyline = result.routes[0].overview_polyline.points
-                const points = PolyLine.decode(overview_polyline);
-                const cords = points.map(point => {
-                    return { latitude: point[0], longitude: point[1] }
-                });
-                const now = moment().tz('Asia/Riyadh').format('YYYY-MM-DDTHH:mm:ss');
-                const expectedArrivalTime = {
-                    placedAt: now,
-                    duration: durationValue
+                if (result.status === "ZERO_RESULTS") {
+                    return "ZERO_RESULTS"
                 }
-                localStorage.storeData('@expectedArrivalTime', expectedArrivalTime)
-                return { cords, steps, details: { duration, distance } };
+                else {
+                    const steps = result.routes[0].legs[0].steps
+                    console.log(steps);
+                    const journey = result.routes[0].legs[0];
+                    const duration = journey.duration;
+                    const distance = journey.distance
+                    const durationValue = Math.ceil(journey.duration.value / 60)
+                    const overview_polyline = result.routes[0].overview_polyline.points
+                    const points = PolyLine.decode(overview_polyline);
+                    const cords = points.map(point => {
+                        return { latitude: point[0], longitude: point[1] }
+                    });
+                    const now = moment().tz('Asia/Riyadh').format('YYYY-MM-DDTHH:mm:ss');
+                    const expectedArrivalTime = {
+                        placedAt: now,
+                        duration: durationValue
+                    }
+                    localStorage.storeData('@expectedArrivalTime', expectedArrivalTime)
+                    return { cords, steps, details: { duration, distance } };
+                }
             });
         }).catch(err => console.log(err));
 }
