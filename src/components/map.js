@@ -5,7 +5,7 @@ import MapView, { PROVIDER_GOOGLE, Marker, Polyline, Circle } from 'react-native
 import Alert from "./Alert"
 import geolib from "geolib"
 import stepChecker from "./RedirectUserLocation"
-import { directions } from './Directions';
+
 import RoundedButton from "./RoundedButton"
 import fromToCords from "./FromToCords"
 
@@ -386,10 +386,10 @@ class Map extends Component {
                 </MapView>
 
 
-                <RoundedButton
+                {/* <RoundedButton
                     backgroundColor={this.state.buttonStatus}
                     position="left"
-                />
+                /> */}
                 {locationButton}
             </Container>
 
@@ -403,7 +403,7 @@ export default Map
 const styles = StyleSheet.create({
     map: {
         width: '100%',
-        height: '100%'
+        height: '110%'
 
     },
 

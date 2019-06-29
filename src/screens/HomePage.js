@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container } from 'native-base';
+import { Container, View } from 'native-base';
 import Header from "../components/Header";
 import SideMenu from './Menu'
 import localStorage from '../components/localStorage'
@@ -10,41 +10,28 @@ import Alert from '../components/Alert'
 import isReadyToDrive from '../components/isReadyToDrive'
 import ActionButton from "../components/ActionButton/ActionButton"
 import Verify from "../components/verifyUserInfo/ShowModal"
+import firebase from "../components/Firebase"
+
 class HomePage extends Component {
   static navigationOptions = {
     header: null
   }
   state = {
-    drivingView: false,
-    cords: '',
-    coordinates: [],
     readyToDrive: true,
-    newOrderRecived: false,
-    isOrderedPickedUp: '',
-    isOrderRecieved: false,
-    isModalVisible: false,
     title: 'WakiDrive',
     nextTripAccepted: undefined,
-    delivered: false,
-    deliveredNum: 0,
     isOpen: false,
     rightIconColor: "#99ccff",
-    region: null,
-    buyer: "",
-    store: "",
-    driver: null,
     checkOrder: false,
-    duration: 0
+    duration: 0,
+    isLoggedIn: undefined,
   }
-  
+
   wasDriverReadyToDrive() {
     localStorage.retrieveData('@isReadyToDrive')
       .then(res => {
         if (res) {
-          //this means the driver was on ReadyToDrive State
           this.setState({ rightIconColor: '#58D68D', readyToDrive: res })
-          this.setState({ checkOrder: false })
-
         }
         else {
           this.setState({
@@ -55,43 +42,54 @@ class HomePage extends Component {
       })
       .catch(err => console.log(err))
   }
+
+  cancelOrder() {
+    let cancel = () => {
+      this.setState({ nextTripAccepted: "canceled" })
+      this.setState({ nextTripAccepted: null })
+      localStorage.storeData("@isDrivingNow", false);
+      this.isReadyToDrive2();
+    }
+    //let therefore = 'Therefore, Please Keep Driving.'
+    Alert("WARNING..", `If you click "Cancel Order", you are not going to be paid for this delivery.\nAlso, you may be restricted to drive for some period time.\n\nTherefore, Please Keep Driving.`, () => cancel(), () => console.log('Keep Driving'), "Cancel Order", "Keep Driving");
+  }
+
   componentDidMount() {
     permission()
   }
+
   componentWillMount() {
     this.wasDriverReadyToDrive()
   }
+
+
   isReadyToDrive(x) {
     if (x) {
-      this.setState({ rightIconColor: '#58D68D', isOpen: false });
+      this.setState({ rightIconColor: '#58D68D', isOpen: false, checkOrder: true });
+
       isReadyToDrive(x);
     }
     else {
       this.setState({
         rightIconColor: '#E74C3C',
         isOpen: false,
+
       });
       isReadyToDrive(x);
     }
   }
-  
+
   isReadyToDrive2() {
-    this.setState({ isOpen: false })
 
     this.setState(prevState => ({
       readyToDrive: !prevState.readyToDrive
     }));
     localStorage.retrieveData('@isDrivingNow').then(res => {
       if (res) {
-        Alert('You must deliver the items to turn it off', '', () => console.log('ok'), () => console.log('cancel'))
+        Alert("You cannot turn this off while driving.", 'You must deliver the items or cancel the order. If you cancel the order, you will not get paid', () => this.cancelOrder(), () => console.log('Keep driving'), "Cancel Order", "Keep Driving");
       }
       else {
         this.isReadyToDrive(this.state.readyToDrive);
-        if (this.state.readyToDrive) {
-          this.setState({ checkOrder: true })
-          this.setState({ checkOrder: false })
-        }
-
       }
     }).catch(err => {
       console.log(err);
@@ -106,6 +104,7 @@ class HomePage extends Component {
       }
     }).catch(err => console.log(err));
   }
+
   showTime(journey) {
     clearInterval(timer)
     let durationText = journey.duration.text
@@ -129,12 +128,7 @@ class HomePage extends Component {
 
     let timer = setInterval(interval, 5000)
   }
-  testProps(title) {
-    console.log(title);
-    // if(title) {
-    //   this.setState({ title })
-    // }
-  }
+
   render() {
 
     return (
@@ -151,18 +145,27 @@ class HomePage extends Component {
             onPressLeft={() => this.setState({ isOpen: true })}
             onLongPressTitle={() => this.onLongPressTitle()}
           />
+
           <Notification
             readyToDrive={this.state.checkOrder}
             nextTripAccepted={this.state.nextTripAccepted}
-            testFun={(x) => {
+            checkOrder={(isNewOrder) => {
+              this.setState({ checkOrder: isNewOrder });
+              console.log("Hello check order");
+            }}
+            delivered={(x) => {
               let redColor = '#E74C3C';
-              if (x === "red" && this.state.rightIconColor !== redColor) {
+              if (x === "red") {
                 this.setState({ rightIconColor: redColor, readyToDrive: false })
               }
             }}
           />
-          <ActionButton />
+          <ActionButton
+            onLongPress={() => console.log("WHASSSSSAAAAPPP")}
+          />
+
           <Verify />
+
         </Container>
       </SideMenu>
 

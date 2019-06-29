@@ -202,7 +202,6 @@ class SignUpForm extends Component {
         <KeyboardAwareScrollView
           style={{ backgroundColor: '#4c69a5' }}
           resetScrollToCoords={{ x: 0, y: 0 }}
-
           scrollEnabled={false}
         >
           <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>

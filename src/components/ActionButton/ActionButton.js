@@ -6,7 +6,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { OverallOrder, Money, History } from './helpers'
 import Payment from "../payment/Payment";
 import Modal from './Modal'
-
+import Account from "./helpers/Account"
 
 class Button extends Component {
     //rgba(231,76,60,1) red color
@@ -14,7 +14,7 @@ class Button extends Component {
         isModalVisible: false,
         button: ""
     };
-    
+
 
     _toggleModal = () =>
         this.setState({ isModalVisible: !this.state.isModalVisible });
@@ -46,11 +46,21 @@ class Button extends Component {
             console.log("hello payment")
             return (
                 <Modal color='#3498db' toggleModal={this._toggleModal} isModalVisible={this.state.isModalVisible}>
-                <Payment />
+                    <Payment />
                 </Modal>
 
 
             )
+        }
+        else if (button === "Account") {
+            return (
+                <Modal color='#3498db' toggleModal={this._toggleModal} isModalVisible={this.state.isModalVisible}>
+                    <Account
+                        done={() => this.setState({ isModalVisible: false })}
+                    />
+                </Modal>
+            )
+
         }
         else {
             return null
@@ -63,7 +73,11 @@ class Button extends Component {
     render() {
 
         return (
-            <ActionButton buttonColor="#9b59b6"
+            <ActionButton
+
+                onLongPress={this.props.onLongPress}
+
+                buttonColor="#9b59b6"
                 autoInactive={false}
                 size={70}
                 position="center"
@@ -83,12 +97,16 @@ class Button extends Component {
                 <ActionButton.Item buttonColor='#3498db' title="Payment" onPress={() => this.chosenButton("Payment")}>
                     <Icon name="md-card" style={styles.actionButtonIcon} />
                 </ActionButton.Item>
+
+                <ActionButton.Item buttonColor='#3498db' title="Account" onPress={() => this.chosenButton("Account")}>
+                    <Icon name="md-card" style={styles.actionButtonIcon} />
+                </ActionButton.Item>
+
             </ActionButton>
 
 
         );
     }
-
 }
 // right:"74%", bottom: '16%'
 const styles = StyleSheet.create({

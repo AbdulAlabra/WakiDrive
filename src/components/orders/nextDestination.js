@@ -5,6 +5,7 @@ import orderDetails from './orderDetails';
 import end from '../endJourney/end'
 import orderPickedUp from './orderPickedUp'
 import update from "../../request/delivery/updateOrderStatus"
+
 const pickNextStore = () => {
     return localStorage.retrieveData('@isDrivingNow')
         .then((isDrivingNow) => {

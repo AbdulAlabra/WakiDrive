@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, ScrollView, Linking } from "react-native";
+import { StyleSheet, ScrollView, Linking, Dimensions } from "react-native";
 import { Form, Item, Text, Input, Label, Button, Title, View } from 'native-base';
 import firebase from "../Firebase"
 import localStorage from "../localStorage"
@@ -7,7 +7,7 @@ import moment from 'moment-timezone'
 import Config from "react-native-config"
 
 
-
+const { width } = Dimensions.get('window');
 
 class Payment extends Component {
     state = {
@@ -100,7 +100,7 @@ class Payment extends Component {
 
                                         <Text style={styles.driverMoney}>Total Fee = {WakiDriveTotal} SAR - {driverTotalOrders} SAR = {Math.abs(WakiDriveTotal - driverTotalOrders)}
                                         </Text>
-                                        <Button onPress={() => PayPageUrl(url)} style={{alignSelf:"center"}}>
+                                        <Button onPress={() => PayPageUrl(url)} style={{ alignSelf: "center" }}>
                                             <Text>Pay Now</Text>
                                         </Button>
 
@@ -206,6 +206,7 @@ class Payment extends Component {
 
         if (WakiDriveTotal > 0) {
             WakiDriveTotalView = <View key={"wakiTotal"} style={styles.WakiTotalBox}>
+                <Title>WakiDrive Earnings</Title>
                 <Title>Total: {WakiDriveTotal} SAR</Title>
                 <Title>For {notPaid.length} orders</Title>
             </View>
@@ -304,7 +305,7 @@ const styles = StyleSheet.create({
     },
     Row: {
         flexDirection: "row",
-        flex: 0.5,  // does not make anyt chaneg
+        flex: 1,  // does not make anyt chaneg
         justifyContent: "space-evenly"
 
     },
@@ -335,7 +336,8 @@ const styles = StyleSheet.create({
     },
     WakiTotalBox: {
         backgroundColor: "#ff5e5e",
-        flex: 0.5,
+        // flex: 0.5,
+        width: width * 0.95,
         alignItems: "center",
         justifyContent: "space-around",
         flexDirection: "column",
@@ -343,8 +345,12 @@ const styles = StyleSheet.create({
         padding: 10
     },
     DriverTotalBox: {
-        backgroundColor: "#05c8ff",
-        flex: 0.5,
+        //        backgroundColor: "#05c8ff",
+        backgroundColor: "#42f595",
+
+        // flex: 0.5,
+        width: width * 0.95,
+
         alignItems: "center",
         justifyContent: "space-around",
         flexDirection: "column",

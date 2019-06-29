@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet } from "react-native";
-import Modal from "react-native-modal";
+import { StyleSheet, Modal } from "react-native";
 import { View } from "native-base";
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -15,11 +14,19 @@ export default class ModalTester extends Component {
 
     render() {
         return (
-            <Modal backdropOpacity={0.9} backdropColor={this.props.color} isVisible={this.props.isModalVisible}>
-                <View style={{ flex: 1 }}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                animated={true}
+                visible={this.props.isModalVisible}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                }}>
+                <View style={{ flex: 1, backgroundColor: this.props.color }}>
                     {this.props.children}
                     <Icon name="md-close" onPress={this.props.toggleModal} style={styles.actionButtonIcon} />
                 </View>
+
             </Modal>
 
         );
@@ -35,6 +42,7 @@ const styles = StyleSheet.create({
     actionButtonIcon: {
         textAlign: "center",
         fontSize: 70,
+        marginBottom: 10,
         // height: 22,
         color: '#FAFAFA',
 

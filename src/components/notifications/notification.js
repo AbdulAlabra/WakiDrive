@@ -8,13 +8,16 @@ import sortStores from "../sortStores";
 import bestOrder from "./helpers/critiria";
 import { directions } from '../Directions';
 import Map from '../map'
-import cancelOrder from '../orders/canceledOrders'
 import LetsDrive from '../orders/LetsDrive'
 import currentDestination from '../orders/currentDestination'
 import moment from "moment-timezone"
 import readyToDrive from "../isReadyToDrive"
 import updateOrderStatus from "../orders/updateUnfulfilledOrders"
+import removeLocalOrder from "../endJourney/updateLocalStorage"
+
+import cancelOrder from '../../request/delivery/cancelOrder'
 import updateDeliveryStatus from "../../request/delivery/updateOrderStatus"
+import assignNewOrder from "../../request/delivery/newOrder"
 
 
 export default class Notification extends Component {
@@ -26,16 +29,46 @@ export default class Notification extends Component {
         storeName: "",
         region: null,
         isAlertOpen: false,
-        driverStatus: undefined,
         coordinates: [],
         steps: [],
         routeIsAdded: false,
 
+        isLoggedIn: undefined,
+        driverID: undefined,
+        driverToken: undefined,
+    }
+
+
+    authantication() {
+        const auth = firebase.auth()
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                console.log("-----LOGIN------")
+                const driverID = user.uid
+                user.getIdToken()
+                    .then(driverToken => {
+                        this.setState({ isLoggedIn: true, driverToken, driverID });
+                        this.isDrivingNow()
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
+                console.log(user)
+            }
+            else {
+                this.setState({ isLoggedIn: false, driverToken: false, driverID: false });
+                console.log("---LOG OUT OR NOT A USER----")
+            }
+
+        }, err => {
+            console.log(err)
+        })
     }
 
     componentWillMount() {
-        this.isDrivingNow()
+        this.authantication();
     }
+
     componentDidMount() {
         //for fresh token
         // this.onTokenRefreshListener = RNFirebase.messaging().onTokenRefresh(fcmToken => {
@@ -44,21 +77,55 @@ export default class Notification extends Component {
         // });
         this.createNotificationListeners();
     }
+
     componentWillUnmount() {
         this.notificationListener();
         this.notificationOpenedListener();
         //for fresh token 
         // this.onTokenRefreshListener();
     }
+
     componentDidUpdate() {
+   
         if (this.props.nextTripAccepted) {
             this.nextTrip(this.props.nextTripAccepted)
         }
+        if (this.props.readyToDrive === true) {
+            console.log("Get order !!!!!")
+            this.test()
+        }
     }
+
+    watchCanceledOrders() {
+        const { driverID } = this.state
+        firebase.database().ref(`drivers/drivingNow/${driverID}/status/canceled`).on("value", (snap) => {
+            let status = snap.val()
+            //if (key === "")
+            //let message = status
+            if (status === true) {
+                this.showAlert("order", "canceled", false)
+                //console.log(status)
+                //console.log(key)
+                snap.ref.parent.parent.set(null);
+                removeLocalOrder()
+                    .then(res => {
+                        readyToDrive(true)
+                        this.delivered("We are very sorry")
+                    })
+                    .catch(err => {
+                        console.log(err)
+
+                    })
+            }
+
+        })
+    }
+
     isDrivingNow() {
         localStorage.retrieveData('@isDrivingNow')
             .then(res => {
                 if (res) {
+                    this.watchCanceledOrders()
                     this.route()
                 }
                 else {
@@ -69,28 +136,32 @@ export default class Notification extends Component {
                             }
                             else {
                                 // you may want to uncomment this to let the user know when they are not ready to drive
-                                this.showAlert("Do not miss any order", "turn on the button", false);
+                                //this.showAlert("Do not miss any order", "turn on the button", false);
                             }
                         })
                 }
             }).catch(err => console.log(err));
     }
-    updateDeliver(refrence, opreation, orderIndexToUpdate) {
-        return localStorage.retrieveData('@driverID')
-            .then(driverID => {
-                if (driverID) {
 
-                    navigator.geolocation.getCurrentPosition(position => {
-                        let location = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                        }
-                        let latlang = `${location.latitude},${location.longitude}`
-                        return updateDeliveryStatus(refrence, driverID, opreation, latlang, orderIndexToUpdate)
-                    }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
-                }
-                else {
-                    return false
+    updateDeliver(refrence, opreation, orderIndexToUpdate) {
+        const { driverID } = this.state
+
+        navigator.geolocation.getCurrentPosition(position => {
+            let location = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+            }
+            let latlang = `${location.latitude},${location.longitude}`
+            return updateDeliveryStatus(refrence, driverID, opreation, latlang, orderIndexToUpdate)
+        }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
+    }
+
+    cancelWhileDriving() {
+        localStorage.retrieveData("@order")
+            .then(order => {
+                if (order) {
+                    const { orderRef, orderID } = order
+                    this.onPressCancel(orderID, orderRef);
                 }
             })
             .catch(err => {
@@ -98,34 +169,42 @@ export default class Notification extends Component {
                 return false
             })
     }
+    
+    assign(refrence) {
+        const { driverID } = this.state
+        navigator.geolocation.getCurrentPosition(position => {
+            let location = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+            }
+            let latlang = `${location.latitude},${location.longitude}`
+            return assignNewOrder(refrence, driverID, latlang)
+        }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
+
+    }
 
     checkOrders() {
-        localStorage.retrieveData('@driverID')
-            .then(driverID => {
-                if (driverID) {
-                    firebase.database().ref(`orderListeners/${driverID}`).once('value', snapshot => {
-                        let numOrder = snapshot.numChildren();
-                        this.setState({ totalOrders: numOrder })
-                        if (numOrder === 0) {
-                            // this.showAlert('You do not have any orders now', "Stay close to your phone we will give an order soon", false)
-                        }
-                        return this.ListenToComingOrders();
-                    })
-                }
-                else {
-                    //no TOKEN 
-                    console.log('No driverID');
-                    return
-                }
-            })
-            .catch(err => {
-                console.log(err);
-            })
+        const { driverID } = this.state
+
+        firebase.database().ref(`orderListeners/${driverID}`).once('value', snapshot => {
+            let numOrder = snapshot.numChildren();
+            this.setState({ totalOrders: numOrder })
+            if (numOrder === 0) {
+                // this.showAlert('You do not have any orders now', "Stay close to your phone we will give an order soon", false)
+            }
+            this.props.checkOrder(false);
+            return this.ListenToComingOrders();
+        })
     }
+
     nextTrip(status) {
         currentDestination().then(destination => {
             if (status === 'delivered') {
                 this.delivered()
+            }
+            else if (status === 'canceled') {
+                this.setState({ pressCanceled: 1 })
+                this.cancelWhileDriving();
             }
             else {
                 //repetitive
@@ -133,6 +212,7 @@ export default class Notification extends Component {
             }
         }).catch(err => console.log(err));
     }
+
     route() {
         currentDestination().then(destination => {
             navigator.geolocation.getCurrentPosition(location => {
@@ -175,45 +255,45 @@ export default class Notification extends Component {
             // this.showAlert(orderID, 'getInitialNotification', false);
         }
     }
+
     // order Checking proccess
     // #1
     ListenToComingOrders() {
+        const { driverID } = this.state
         let x = 0
-        localStorage.retrieveData('@driverID').then(driverID => {
-            firebase.database().ref(`orderListeners/${driverID}`).on('child_added', (snapshot) => {
-                let orderID = snapshot.key;
-                console.log('orderID ' + orderID)
-                this.isOrderFulfilled(orderID).then(status => {
-                    x++
-                    if (status) {
-                        let deletedOrder = this.state.deletedOrders + 1;
-                        this.setState({ deletedOrders: deletedOrder });
-                        snapshot.ref.remove()
-                            .then(() => this.showAlert('Firebase', "Delete ", false))
-                            .catch(err => this.showAlert('Firebase', "Delete WRONG", false));
-                    }
 
-                    else if (x >= Number(this.state.totalOrders)) {
-                        let updatedTotalOrders = this.state.totalOrders - this.state.deletedOrders;
-                        this.setState({ totalOrders: updatedTotalOrders })
-                        bestOrder().then(order => {
-                            console.log('---------New Order----------')
-                            let orderRefrence = order.orderRefrence
-                            let orderID = order.orderID
-                            console.log(orderID);
-                            console.log('---------New Order----------')
-                            if (this.state.isAlertOpen === false) {
-                                this.showAlert("You Have One Order", "Lets drive now ", orderID, orderRefrence);
-                                this.setState({ isAlertOpen: true })
-                            }
-                        }).catch(err => console.log(err));
-                    }
+        firebase.database().ref(`orderListeners/${driverID}`).on('child_added', (snapshot) => {
+            console.log("HIIIII");
+            let orderID = snapshot.key;
+            console.log('orderID ' + orderID)
+            this.isOrderFulfilled(orderID).then(status => {
+                x++
+                if (status) {
+                    let deletedOrder = this.state.deletedOrders + 1;
+                    this.setState({ deletedOrders: deletedOrder });
+                    snapshot.ref.remove()
+                }
 
-                }).catch(err => {
-                    console.log(err);
-                });
-            })
-        }).catch(err => console.log(err));
+                else if (x >= Number(this.state.totalOrders)) {
+                    let updatedTotalOrders = this.state.totalOrders - this.state.deletedOrders;
+                    this.setState({ totalOrders: updatedTotalOrders })
+                    bestOrder().then(order => {
+                        console.log('---------New Order----------')
+                        let orderRefrence = order.orderRefrence
+                        let orderID = order.orderID
+                        console.log(orderID);
+                        console.log('---------New Order----------')
+                        if (this.state.isAlertOpen === false) {
+                            this.showAlert("You Have One Order", "Lets drive now ", orderID, orderRefrence);
+                            this.setState({ isAlertOpen: true })
+                        }
+                    }).catch(err => console.log(err));
+                }
+
+            }).catch(err => {
+                console.log(err);
+            });
+        })
     }
     // #2
     isOrderFulfilled(orderID) {
@@ -245,6 +325,7 @@ export default class Notification extends Component {
             return;
         }
     }
+
     // # 4
     onPressOk(orderID, orderRefrence) {
         this.setState({ isAlertOpen: false })
@@ -266,8 +347,18 @@ export default class Notification extends Component {
     onPressCancel(orderID, orderRefrence) {
         this.setState({ isAlertOpen: false })
         if (this.state.pressCanceled === 1) {
-            this.showAlert('Order Canceled', "You Will band you for sometime", false);
-            cancelOrder(orderRefrence, orderID)
+            this.showAlert('Order Canceled', "You may not be able to drive for some period of time.", false);
+            const uid = firebase.auth().currentUser.uid
+            const timeZone = moment.tz.guess();
+            navigator.geolocation.getCurrentPosition(position => {
+                let location = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                }
+                let latlang = `${location.latitude},${location.longitude}`
+                cancelOrder(orderRefrence, uid, "driver", timeZone, latlang)
+            }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
+
         }
         else {
             this.setState({ pressCanceled: 1 })
@@ -311,7 +402,10 @@ export default class Notification extends Component {
 
     // #6
     saveOrderLocally(stores, buyerLocation, BuyerInfo, orderRef, startingLocation, sortedStoresKey, orderID, cost) {
-        let assignedAt = moment().tz('Asia/Riyadh').format('YYYY-MM-DDTHH:mm:ss')
+        const { driverID } = this.state
+        let timeZone = moment.tz.guess()
+        let assignedAt = moment().tz(timeZone).format('YYYY-MM-DDTHH:mm:ss')
+
         let order = {
             pickedOrders: [],
             stores,
@@ -339,7 +433,7 @@ export default class Notification extends Component {
                         this.route()
                         updateOrderStatus("order accepted")
                             .then(res => {
-                                let driverID = firebase.auth().currentUser.uid;
+                                this.assign(order.orderRef);
                                 LetsDrive(driverID, order)
                                 console.log("resssssss: " + res)
                             })
@@ -353,18 +447,20 @@ export default class Notification extends Component {
 
             }).catch(err => console.log(err))
     }
+    test() {
+        console.log("Yooooooooooooo")
+        this.props.checkOrder(false);
+    }
     // order Checking proccess
-    delivered() {
+    delivered(messge) {
         this.setState({ coordinates: [], steps: [] });
-        Alert('You Did it! Thanks..', 'You like to keep driving ?',
+        Alert(messge || 'You Did it! Thanks..', 'You like to keep driving ?',
             () => {
                 this.checkOrders()
             }, () => {
-                console.log('cancel');
                 readyToDrive(false)
-                this.setState({ driverStatus: "red" })
+                this.props.delivered("red");
                 this.setState({
-                    driverStatus: undefined,
                     steps: [],
                     cords: [],
                 })
@@ -373,26 +469,25 @@ export default class Notification extends Component {
     }
 
     render() {
-        const { readyToDrive, nextTripAccepted, testFun } = this.props
+        const { isLoggedIn } = this.state
+        const { readyToDrive, nextTripAccepted } = this.props
+
         return (
             <Container
-                readyToDrive={(readyToDrive === true) ? this.checkOrders() : null}
                 nextTripAccepted={nextTripAccepted}
-                testFun={testFun(this.state.driverStatus)}
-
-
             >
                 <Map
                     cords={this.state.coordinates}
                     step={this.state.steps}
-
                     Reroute={() => this.route()}
                     newRoute={this.state.routeIsAdded}
                     routeIsAdded={() => this.setState({ routeIsAdded: false })}
                 />
-
+            
             </Container>
         )
     }
 
 }
+
+

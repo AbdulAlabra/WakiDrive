@@ -1,6 +1,6 @@
 import localStorage from '../localStorage'
 import firebase from '../Firebase'
-
+import moment from "moment-timezone"
 const LetsDrive = (driverID, order) => {
     let db = firebase.database();
     db.ref(`drivers/readyToDrive/${driverID}`).once('value', snapshot => {
@@ -8,7 +8,15 @@ const LetsDrive = (driverID, order) => {
     })
         .then((result) => {
             let data = result.val();
-            data.order = order
+            let status = {
+                refrence: order.orderRef,
+                canceled: false,
+                assignedAt: order.assignedAt,
+                timeZone: moment.tz.guess()
+            }
+            // we were adding the whole order
+            //data.order = order
+            data.status = status
             db.ref(`drivers/drivingNow/${driverID}`).set(data)
                 .then(() => {
                     localStorage.storeData("@isDrivingNow", true);

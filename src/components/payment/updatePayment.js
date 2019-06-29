@@ -33,15 +33,14 @@ const query = () => {
         })
 }
 
-
-
 // when order is paid by cash on delivery
 const saveNotPaid = (driverID, orderRefrence, paymentMethod, startingLocation, costDetails) => {
     const { driverMoney, currency, commission, deliveryCost } = costDetails.cost
-    let time = moment().tz('Asia/Riyadh').format('YYYY-MM-DDTHH:mm:ss');
+    let timeZone = moment.tz.guess()
+    let time = moment().tz(timeZone).format('LLLL');
     return db.ref(`drivers/registeredDrivers/${driverID}/driverHistory/payment/notPaid/current/payments`).push().set({
         time,
-        timeZone: "Asia/Riyadh",
+        timeZone,
         currency,
         driverMoney,
         commission,
@@ -63,10 +62,11 @@ const saveNotPaid = (driverID, orderRefrence, paymentMethod, startingLocation, c
 // when order is paid by visa
 const paymentForDriver = (driverID, orderRefrence, paymentMethod, startingLocation, costDetails) => {
     const { driverMoney, currency, commission, deliveryCost } = costDetails.cost
-    let time = moment().tz('Asia/Riyadh').format('YYYY-MM-DDTHH:mm:ss');
+    let timeZone = moment.tz.guess()
+    let time = moment().tz(timeZone).format('LLLL');
     return db.ref(`drivers/registeredDrivers/${driverID}/driverHistory/payment/paymentToDriver/current/payments`).push().set({
         time,
-        timeZone: "Asia/Riyadh",
+        timeZone,
         currency,
         driverMoney,
         commission,
