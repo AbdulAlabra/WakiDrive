@@ -9,7 +9,6 @@ const readyToDrive = (status) => {
     const auth = firebase.auth()
     const driverID = auth.currentUser.uid;
     const userUpdate = auth.currentUser.reload();
-    
     const token = auth.currentUser.getIdTokenResult(true)
     .then(res => {
         console.log(res);
@@ -87,7 +86,7 @@ const readyToDrive = (status) => {
 
     }
     else {
-        messege('please sign up to start driving', "");
+        messege('please sign up or sign in to start driving', "");
     }
 }
 

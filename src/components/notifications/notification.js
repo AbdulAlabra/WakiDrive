@@ -43,7 +43,6 @@ export default class Notification extends Component {
         const auth = firebase.auth()
         auth.onAuthStateChanged(user => {
             if (user) {
-                console.log("-----LOGIN------")
                 const driverID = user.uid
                 user.getIdToken()
                     .then(driverToken => {

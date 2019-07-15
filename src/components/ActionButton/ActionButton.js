@@ -6,7 +6,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { OverallOrder, Money, History } from './helpers'
 import Payment from "../payment/Payment";
 import Modal from './Modal'
-import Account from "./helpers/Account"
+import Account from "../Account/LogIn"
 
 class Button extends Component {
     //rgba(231,76,60,1) red color

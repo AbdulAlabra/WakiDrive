@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Form, Item, Text, Input, Label, Button, Title, View } from 'native-base';
 import localStorage from "../localStorage"
 import firebase from '../Firebase';
-import Modal from "../ActionButton/Modal"
+
 import Alert from "../Alert"
 
 class Email extends Component {
@@ -61,15 +61,15 @@ class Email extends Component {
                     }).then(() => {
                         console.log("done");
                         localStorage.storeData("@emailVerified", true)
-                        .then(res => {
-                            localStorage.storeData("@email", email)
-                            this.setState({ isConfirmed: true })
-                            this.props.onComplete()
+                            .then(res => {
+                                localStorage.storeData("@email", email)
+                                this.setState({ isConfirmed: true })
+                                this.props.onComplete()
 
-                        })
-                        .catch(err => {
-                            console.log(err)
-                        })
+                            })
+                            .catch(err => {
+                                console.log(err)
+                            })
 
                     }).catch(err => {
                         console.log(err);
@@ -93,7 +93,7 @@ class Email extends Component {
             if (isVerified) {
                 Alert("Verified !", "You can start driving now. \nThanks :)", () => this.verified(), () => this.verified())
             }
-            
+
             else {
                 Alert(email, "please check your email we have sent a link but you have not open it yet", () => console.log("ok"), () => console.log("cancel"))
             }
@@ -193,46 +193,42 @@ class Email extends Component {
         }
 
         return (
-            <Modal color='#9b59b6' toggleModal={this._toggleModal} isModalVisible={(this.state.isConfirmed === true) ? false : this.state.isModalVisible}>
+            <View style={{ flex: 1, justifyContent: "center" }}>
+                <Title>{(mustLogIn === true) ? "Log In First" : "Email Verification"}</Title>
+                <Text style={{ textAlign: "center", margin: 10 }}>{(mustLogIn === true) ? LogInText : emailText}</Text>
+                <Title>{(ChangeEmail === true) ? email : oldEmail}</Title>
+                <View style={{ justifyContent: "space-between" }}>
+                    {form}
 
-                
-                <View style={{ flex: 1, justifyContent: "center" }}>
-                    <Title>{(mustLogIn === true) ? "Log In First" : "Email Verification"}</Title>
-                    <Text style={{ textAlign: "center", margin: 10 }}>{(mustLogIn === true) ? LogInText : emailText}</Text>
-                    <Title>{(ChangeEmail === true) ? email : oldEmail}</Title>
-                    <View style={{ justifyContent: "space-between" }}>
-                        {form}
+                    <Text style={{ textAlign: "center", color: "red" }}>{this.state.warning}</Text>
 
-                        <Text style={{ textAlign: "center", color: "red" }}>{this.state.warning}</Text>
+                    <Text onPress={() => this.sendLink()} style={{ textAlign: "center", color: "blue" }}>{(isLinkSent === true) ? "Send Again" : null}</Text>
 
-                        <Text onPress={() => this.sendLink()} style={{ textAlign: "center", color: "blue" }}>{(isLinkSent === true) ? "Send Again" : null}</Text>
+                    <Title style={{ marginTop: 20 }}>{this.state.message}</Title>
 
-                        <Title style={{ marginTop: 20 }}>{this.state.message}</Title>
-
-                        <Button full info style={{ marginTop: 20 }} onPress={() => {
-                            this.setState({ warning: "", message: "" })
-                            if (isLinkSent) {
-                                this.verify();
+                    <Button full info style={{ marginTop: 20 }} onPress={() => {
+                        this.setState({ warning: "", message: "" })
+                        if (isLinkSent) {
+                            this.verify();
+                        }
+                        else if (ChangeEmail) {
+                            if (mustLogIn) {
+                                this.login()
                             }
-                            else if (ChangeEmail) {
-                                if (mustLogIn) {
-                                    this.login()
-                                }
-                                else {  
-                                    this.updateEmailAssurance();
-                                }
-                            } else {
-                                this.sendLink()
+                            else {
+                                this.updateEmailAssurance();
                             }
-                        }}>
-                            <Text>{(isLinkSent === true) ? "Verify Now" : (mustLogIn === true) ? "Log in" : (ChangeEmail === true) ? "Send Now" : "Send Again"}</Text>
+                        } else {
+                            this.sendLink()
+                        }
+                    }}>
+                        <Text>{(isLinkSent === true) ? "Verify Now" : (mustLogIn === true) ? "Log in" : (ChangeEmail === true) ? "Send Now" : "Send Again"}</Text>
 
-                        </Button>
-                        <Title style={{ marginTop: 20 }}>{(ChangeEmail === true || isLinkSent === true) ? "" : "Or"}</Title>
-                        {chnageButton}
-                    </View>
+                    </Button>
+                    <Title style={{ marginTop: 20 }}>{(ChangeEmail === true || isLinkSent === true) ? "" : "Or"}</Title>
+                    {chnageButton}
                 </View>
-            </Modal>
+            </View>
 
         );
     }

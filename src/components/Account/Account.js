@@ -1,21 +1,23 @@
 import React, { Component } from 'react';
 import { Form, Item, Text, Input, Label, Button, Title, Subtitle, button } from 'native-base';
-import { Dimensions, StyleSheet, View, } from "react-native"
+import { StyleSheet, View, } from "react-native"
 
-import ValidateForm from "../../FormValidatiom"
+import ValidateForm from "../FormValidatiom"
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import Loading from "../../Loading"
-import AddDriver from "../../../request/delivery/newDriver"
+import Loading from "../Loading"
+import AddDriver from "../../request/delivery/newDriver"
 import firebaseRN from "react-native-firebase"
-import firebase from "../../Firebase"
+import firebase from "../Firebase"
+import message from "../message"
+import Auth from "../auth"
+import LogIn from "./LogIn"
+import localStorage from "../localStorage"
 
-import Auth from "../../auth"
-const { height } = Dimensions.get('window');
+
 
 
 class SignUpForm extends Component {
     state = {
-
         email: "",
         password: "",
         firstName: "",
@@ -31,8 +33,10 @@ class SignUpForm extends Component {
     componentWillMount() {
 
     }
+    
+
     signUserUp() {
-        const { fetching, logIn, firstName, lastName, phone, email, password } = this.state;
+        const { firstName, lastName, phone, email, password } = this.state;
         //this.setState({ fetching: true });
         const isValid = ValidateForm(firstName, lastName, phone, email, password)
         if (isValid) {
@@ -45,6 +49,7 @@ class SignUpForm extends Component {
                 }
                 else {
                     console.log("FAILED");
+                    message("Somthing Went Wrong", "Please try again later");
                     this.setState({ fetching: false })
                 }
             })
@@ -70,19 +75,23 @@ class SignUpForm extends Component {
     }
 
     addUser() {
-        const { fetching, logIn, firstName, lastName, phone, email, password } = this.state;
+        const { firstName, lastName, phone, email, password } = this.state;
         const userToken = firebase.auth().currentUser.getIdToken()
         const fcmToken = firebaseRN.messaging().getToken()
         fcmToken.then(fcm => {
             userToken.then(token => {
                 AddDriver(firstName, lastName, phone, email, password, fcm, token)
                     .then(res => {
+                    let message = res.message !== undefined? res.message : "Please try again later";
                         if (res.status === "ADDED") {
                             console.log("user is added");
+                            localStorage.storeData("@email", email);
+                            localStorage.storeData("@phone", phone);
                             this.clear()
                         }
                         else {
-                            console.log("user is not aded");
+                            message("Somthing Went Wrong", message);
+
                         }
                     })
                     .catch(err => {
@@ -102,6 +111,8 @@ class SignUpForm extends Component {
 
         if (logIn) {
             return <LogIn />
+            //return <AccountInfo />
+
         }
         if (fetching) {
             return <Loading />
@@ -198,67 +209,6 @@ class SignUpForm extends Component {
     }
 }
 
-class LogIn extends Component {
-    state = {
-        signUp: false,
-        email: "",
-        password: "",
-    }
-    render() {
-        const { signUp } = this.state
-        if (signUp) {
-            return <SignUpForm />
-        }
-        return (
-            <KeyboardAwareScrollView
-                contentContainerStyle={{
-                    flex: 1
-                }}
-                resetScrollToCoords={{ x: 0, y: 0 }}
-                scrollEnabled={true}
-            >
-
-                <View style={styles.title}>
-                    <Title style={styles.titleText}>Log in to your account</Title>
-                    <Subtitle style={styles.Subtitle}>or sign up <Subtitle onPress={() => this.setState({ signUp: true })} style={{ color: "blue", fontWeight: "bold" }}>here</Subtitle> if you don't already have an account</Subtitle>
-                </View>
-
-                <Form style={styles.form}>
-                    <Item style={styles.item} inlineLabel last>
-                        <Label>Email</Label>
-                        <Input
-                            label={"f4"}
-                            keyboardType="email-address"
-                            returnKeyType={"next"}
-                            value={this.state.email}
-                            onChangeText={email => this.setState({ email, isOpen: false })}
-                        />
-
-                    </Item>
-                    <Item style={styles.item} inlineLabel last>
-                        <Label>Password</Label>
-                        <Input
-                            blurOnSubmit={false}
-                            label={"f5"}
-                            returnKeyType={"done"}
-                            value={this.state.password}
-                            onChangeText={password => this.setState({ password, isOpen: false })}
-                            secureTextEntry={true}
-                        />
-                    </Item>
-
-                </Form>
-                <View style={styles.buttonContainer}>
-                    <Button style={styles.Button} block>
-                        <Text>Log in</Text>
-                    </Button>
-                </View>
-
-            </KeyboardAwareScrollView>
-
-        );
-    }
-}
 
 
 const styles = StyleSheet.create({
