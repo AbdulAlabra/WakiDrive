@@ -4,24 +4,20 @@ import Alert from './Alert'
 import firebaseRN from "react-native-firebase";
 
 const db = firebase.database();
-
 const readyToDrive = (status) => {
     const auth = firebase.auth()
-    const driverID = auth.currentUser.uid;
-    const userUpdate = auth.currentUser.reload();
-    const token = auth.currentUser.getIdTokenResult(true)
-    .then(res => {
-        console.log(res);
-        console.log(res.token);
-    })
-    .catch(err => {
-        console.log(err)
-    })
-
-
-    console.log("driverID " + driverID);
-
-    if (driverID) {
+    const user = auth.currentUser;
+    if (user) {
+        const driverID = user.uid;
+        const userUpdate = auth.currentUser.reload();
+        const token = auth.currentUser.getIdTokenResult(true)
+            .then(res => {
+                console.log(res);
+                console.log(res.token);
+            })
+            .catch(err => {
+                console.log(err)
+            })
         if (status) {
             db.ref(`drivers/registeredDrivers/${driverID}`).once('value', function (data) {
                 var token = ""

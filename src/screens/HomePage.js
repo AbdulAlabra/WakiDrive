@@ -10,6 +10,7 @@ import Alert from '../components/Alert'
 import isReadyToDrive from '../components/isReadyToDrive'
 import ActionButton from "../components/ActionButton/ActionButton"
 import Verify from "../components/verifyUserInfo/ShowModal"
+import Loading from "../components/Loading"
 import firebase from "../components/Firebase"
 
 class HomePage extends Component {
@@ -17,6 +18,7 @@ class HomePage extends Component {
     header: null
   }
   state = {
+    userIsLoaded: false,
     readyToDrive: true,
     title: 'WakiDrive',
     nextTripAccepted: undefined,
@@ -27,6 +29,23 @@ class HomePage extends Component {
     isLoggedIn: undefined,
   }
 
+  authantication() {
+    const auth = firebase.auth()
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        this.setState({ userIsLoaded: true });
+
+        console.log(user)
+      }
+      else {
+        this.setState({ userIsLoaded: true });
+        console.log("---LOG OUT OR NOT A USER----")
+      }
+
+    }, err => {
+      console.log(err)
+    })
+  }
   wasDriverReadyToDrive() {
     localStorage.retrieveData('@isReadyToDrive')
       .then(res => {
@@ -56,9 +75,11 @@ class HomePage extends Component {
 
   componentDidMount() {
     permission()
+
   }
 
   componentWillMount() {
+    this.authantication();
     this.wasDriverReadyToDrive()
   }
 
@@ -130,46 +151,50 @@ class HomePage extends Component {
   }
 
   render() {
+    if (this.state.userIsLoaded === false) {
+      return null
+    }
+    else {
+      return (
+        <SideMenu isOpen={this.state.isOpen}>
+          <Container>
+            <Header
+              title={this.state.title}
+              rightIconName="car"
+              rightIconColor={this.state.rightIconColor}
+              iconSize={30}
+              onLongPressRight={() => console.log('right long press')}
+              onPressTitle={() => console.log("title")}
+              onPressRight={() => this.isReadyToDrive2()}
+              onPressLeft={() => this.setState({ isOpen: true })}
+              onLongPressTitle={() => this.onLongPressTitle()}
+            />
 
-    return (
-      <SideMenu isOpen={this.state.isOpen}>
-        <Container>
-          <Header
-            title={this.state.title}
-            rightIconName="car"
-            rightIconColor={this.state.rightIconColor}
-            iconSize={30}
-            onLongPressRight={() => console.log('right long press')}
-            onPressTitle={() => console.log("title")}
-            onPressRight={() => this.isReadyToDrive2()}
-            onPressLeft={() => this.setState({ isOpen: true })}
-            onLongPressTitle={() => this.onLongPressTitle()}
-          />
+            <Notification
+              readyToDrive={this.state.checkOrder}
+              nextTripAccepted={this.state.nextTripAccepted}
+              checkOrder={(isNewOrder) => {
+                this.setState({ checkOrder: isNewOrder });
+                console.log("Hello check order");
+              }}
+              delivered={(x) => {
+                let redColor = '#E74C3C';
+                if (x === "red") {
+                  this.setState({ rightIconColor: redColor, readyToDrive: false })
+                }
+              }}
+            />
+            <ActionButton
+              onLongPress={() => console.log("WHASSSSSAAAAPPP")}
+            />
 
-          <Notification
-            readyToDrive={this.state.checkOrder}
-            nextTripAccepted={this.state.nextTripAccepted}
-            checkOrder={(isNewOrder) => {
-              this.setState({ checkOrder: isNewOrder });
-              console.log("Hello check order");
-            }}
-            delivered={(x) => {
-              let redColor = '#E74C3C';
-              if (x === "red") {
-                this.setState({ rightIconColor: redColor, readyToDrive: false })
-              }
-            }}
-          />
-          <ActionButton
-            onLongPress={() => console.log("WHASSSSSAAAAPPP")}
-          />
+            <Verify />
 
-          <Verify />
+          </Container>
+        </SideMenu>
 
-        </Container>
-      </SideMenu>
-
-    );
+      );
+    }
   }
 }
 

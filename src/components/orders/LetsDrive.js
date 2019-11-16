@@ -16,6 +16,7 @@ const LetsDrive = (driverID, order) => {
             }
             // we were adding the whole order
             //data.order = order
+            console.log(data)
             data.status = status
             db.ref(`drivers/drivingNow/${driverID}`).set(data)
                 .then(() => {

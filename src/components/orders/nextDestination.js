@@ -5,7 +5,7 @@ import orderDetails from './orderDetails';
 import end from '../endJourney/end'
 import orderPickedUp from './orderPickedUp'
 import update from "../../request/delivery/updateOrderStatus"
-
+import firebase from "../Firebase"
 const pickNextStore = () => {
     return localStorage.retrieveData('@isDrivingNow')
         .then((isDrivingNow) => {
@@ -44,9 +44,10 @@ const pickNextStore = () => {
 const getOverallOrder = () => {
     return localStorage.retrieveData('@order')
         .then((order) => {
+
             let orders = order.sortedStoresKey;
             let pickedOrderKey = orders[0];
-            
+
             orders.shift()
             let orderToPick = orders[0]
             let store = order.stores[orderToPick];
@@ -56,9 +57,10 @@ const getOverallOrder = () => {
                 if (pickedOrderKey !== undefined) {
                     order.pickedOrders.push(pickedOrderKey);
                     let buyerLocation = order.buyerLocation;
+                    let desteniation = order.stores[pickedOrderKey].location;
                     console.log("Time to go to buyer " + pickedOrderKey)
-                    updateDeliveryStatus(order.orderRef, "picked-up", pickedOrderKey)
-                    updateDeliveryStatus(order.orderRef, "end-user")
+                    updateDeliveryStatus(order.orderRef, "picked-up", pickedOrderKey, desteniation)
+                    updateDeliveryStatus(order.orderRef, "end-user", false, buyerLocation);
                     console.log('Time To Go TO THE BUYER')
                     return saveOrder(order, buyerLocation)
                 }
@@ -80,9 +82,10 @@ const getOverallOrder = () => {
                 }
             }
             else {
-                console.log("hiiii " + pickedOrderKey)
-                updateDeliveryStatus(order.orderRef, "picked-up", pickedOrderKey)
-                updateDeliveryStatus(order.orderRef, "omw", orderToPick)
+                //console.log("hiiii " + pickedOrderKey)
+                let desteniation = store.location;
+                updateDeliveryStatus(order.orderRef, "picked-up", pickedOrderKey, desteniation);
+                updateDeliveryStatus(order.orderRef, "omw", orderToPick, desteniation);
                 order.pickedOrders.push(pickedOrderKey);
                 return saveOrder(order, store)
             }
@@ -137,36 +140,27 @@ const messege = (title, body) => {
 }
 
 
-const updateDeliveryStatus = (refrence, opreation, orderIndex) => {
-    localStorage.retrieveData("@driverID")
-        .then(driverID => {
-            if (driverID) {
-                return navigator.geolocation.getCurrentPosition(position => {
-                    let location = {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                    }
-                    let latlang = `${location.latitude},${location.longitude}`
+const updateDeliveryStatus = (refrence, opreation, orderIndex, desteniationLocation) => {
+    const driverID = firebase.auth().currentUser.uid
+    return navigator.geolocation.getCurrentPosition(position => {
+        let location = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+        }
+        let origin = `${location.latitude},${location.longitude}`
+        let desteniation =  `${desteniationLocation.latitude},${desteniationLocation.longitude}`
 
-                    return update(refrence, driverID, opreation, latlang, orderIndex)
-                        .then(result => {
-                            return result
-                        })
-                        .catch(err => {
-                            console.log(err)
-                            return false
-                        })
-                }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
-
-            }
-            else {
+        return update(refrence, driverID, opreation, origin, orderIndex, desteniation)
+            .then(result => {
+                console.log(result)
+                return result
+            })
+            .catch(err => {
+                console.log(err)
                 return false
-            }
-        })
-        .catch(err => {
-            console.log(err)
-            return false
-        })
+            })
+    }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
+
 }
 
 

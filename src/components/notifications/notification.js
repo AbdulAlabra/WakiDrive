@@ -12,9 +12,7 @@ import LetsDrive from '../orders/LetsDrive'
 import currentDestination from '../orders/currentDestination'
 import moment from "moment-timezone"
 import readyToDrive from "../isReadyToDrive"
-import updateOrderStatus from "../orders/updateUnfulfilledOrders"
 import removeLocalOrder from "../endJourney/updateLocalStorage"
-
 import cancelOrder from '../../request/delivery/cancelOrder'
 import updateDeliveryStatus from "../../request/delivery/updateOrderStatus"
 import assignNewOrder from "../../request/delivery/newOrder"
@@ -43,6 +41,7 @@ export default class Notification extends Component {
         const auth = firebase.auth()
         auth.onAuthStateChanged(user => {
             if (user) {
+                console.log("USER IS LOGGED IN");
                 const driverID = user.uid
                 user.getIdToken()
                     .then(driverToken => {
@@ -85,7 +84,7 @@ export default class Notification extends Component {
     }
 
     componentDidUpdate() {
-   
+
         if (this.props.nextTripAccepted) {
             this.nextTrip(this.props.nextTripAccepted)
         }
@@ -142,7 +141,7 @@ export default class Notification extends Component {
             }).catch(err => console.log(err));
     }
 
-    updateDeliver(refrence, opreation, orderIndexToUpdate) {
+    updateDeliver(refrence, opreation, orderIndexToUpdate, destination) {
         const { driverID } = this.state
 
         navigator.geolocation.getCurrentPosition(position => {
@@ -151,7 +150,8 @@ export default class Notification extends Component {
                 longitude: position.coords.longitude,
             }
             let latlang = `${location.latitude},${location.longitude}`
-            return updateDeliveryStatus(refrence, driverID, opreation, latlang, orderIndexToUpdate)
+            let destinationLatLang = `${destination.latitude},${destination.longitude}`
+            return updateDeliveryStatus(refrence, driverID, opreation, latlang, orderIndexToUpdate, destinationLatLang);
         }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
     }
 
@@ -168,7 +168,7 @@ export default class Notification extends Component {
                 return false
             })
     }
-    
+
     assign(refrence) {
         const { driverID } = this.state
         navigator.geolocation.getCurrentPosition(position => {
@@ -184,7 +184,6 @@ export default class Notification extends Component {
 
     checkOrders() {
         const { driverID } = this.state
-
         firebase.database().ref(`orderListeners/${driverID}`).once('value', snapshot => {
             let numOrder = snapshot.numChildren();
             this.setState({ totalOrders: numOrder })
@@ -262,9 +261,8 @@ export default class Notification extends Component {
         let x = 0
 
         firebase.database().ref(`orderListeners/${driverID}`).on('child_added', (snapshot) => {
-            console.log("HIIIII");
             let orderID = snapshot.key;
-            console.log('orderID ' + orderID)
+            // console.log('orderID ' + orderID)
             this.isOrderFulfilled(orderID).then(status => {
                 x++
                 if (status) {
@@ -278,13 +276,15 @@ export default class Notification extends Component {
                     this.setState({ totalOrders: updatedTotalOrders })
                     bestOrder().then(order => {
                         console.log('---------New Order----------')
+
+                        console.log(order);
+                        console.log('---------New Order----------')
                         let orderRefrence = order.orderRefrence
                         let orderID = order.orderID
-                        console.log(orderID);
-                        console.log('---------New Order----------')
+                        console.log(orderRefrence);
                         if (this.state.isAlertOpen === false) {
                             this.showAlert("You Have One Order", "Lets drive now ", orderID, orderRefrence);
-                            this.setState({ isAlertOpen: true })
+                            this.setState({ isAlertOpen: true });
                         }
                     }).catch(err => console.log(err));
                 }
@@ -294,14 +294,16 @@ export default class Notification extends Component {
             });
         })
     }
+
     // #2
     isOrderFulfilled(orderID) {
         return firebase.database().ref(`unfulfilled/${orderID}`).once('value')
             .then(result => {
                 let order = result.val();
-                let orderStatus = order.orderStatus;
-                if (orderStatus === "new" || orderStatus === "unfulfilled") {
-
+                //console.log(order)
+                const { driverID } = order.status
+                //let orderStatus = order.orderStatus;
+                if (driverID === this.state.driverID) {
                     return false;
                 }
                 else {
@@ -312,6 +314,7 @@ export default class Notification extends Component {
             })
             .catch(err => console.log(err));
     }
+
     // #3
     showAlert(title, body, orderID, orderRefrence) {
 
@@ -365,6 +368,7 @@ export default class Notification extends Component {
         }
 
     }
+
     // #5
     getOrderDetails(dbRef, orderID) {
         let orderRef = dbRef.replace('/stores', "");
@@ -384,14 +388,28 @@ export default class Notification extends Component {
                 }
                 let driver = `${startingLocation.latitude},${startingLocation.longitude}`
 
-                sortStores(driver, stores)
-                    .then(sortedKeys => {
-                        if (sortedKeys) {
-                            this.saveOrderLocally(stores, buyerLocation, BuyerInfo, orderRef, startingLocation, sortedKeys, orderID, cost);
+                assignNewOrder(orderRef, this.state.driverID, driver)
+                    .then(res => {
+                        if (res.status === "ASSIGNED") {
+                            sortStores(driver, stores)
+                                .then(sortedKeys => {
+                                    if (sortedKeys) {
+                                        this.saveOrderLocally(stores, buyerLocation, BuyerInfo, orderRef, startingLocation, sortedKeys, orderID, cost);
+                                    }
+                                })
+                                .catch(err => console.log(err));
                         }
+                        else {
 
+                            console.log("COULD NOT ASSIGNE ORDER");
+                        }
                     })
-                    .catch(err => console.log(err));
+                    .catch(err => {
+                        console.log(err)
+                    })
+
+
+
             }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true });
 
         }).catch(err => {
@@ -404,7 +422,6 @@ export default class Notification extends Component {
         const { driverID } = this.state
         let timeZone = moment.tz.guess()
         let assignedAt = moment().tz(timeZone).format('YYYY-MM-DDTHH:mm:ss')
-
         let order = {
             pickedOrders: [],
             stores,
@@ -421,24 +438,18 @@ export default class Notification extends Component {
         localStorage.storeData("@order", order)
             .then(response => {
                 let closestStoreKey = response.sortedStoresKey[0];
-                this.updateDeliver(order.orderRef, "omw", closestStoreKey)
+                let destination = response.stores[closestStoreKey].location;
+                this.updateDeliver(order.orderRef, "omw", closestStoreKey, destination);
                 let store = response.stores[closestStoreKey];
 
                 console.log(response);
                 //save current destination/store
                 localStorage.storeData('@currentOrder', store)
                     .then(chosenStore => {
-
                         this.route()
-                        updateOrderStatus("order accepted")
-                            .then(res => {
-                                this.assign(order.orderRef);
-                                LetsDrive(driverID, order)
-                                console.log("resssssss: " + res)
-                            })
-                            .catch(err => {
-                                console.log(err)
-                            })
+                        LetsDrive(driverID, order);
+
+
                     })
                     .catch(err => {
                         console.log(err);
@@ -446,6 +457,7 @@ export default class Notification extends Component {
 
             }).catch(err => console.log(err))
     }
+
     test() {
         console.log("Yooooooooooooo")
         this.props.checkOrder(false);
@@ -455,6 +467,7 @@ export default class Notification extends Component {
         this.setState({ coordinates: [], steps: [] });
         Alert(messge || 'You Did it! Thanks..', 'You like to keep driving ?',
             () => {
+                readyToDrive(true)
                 this.checkOrders()
             }, () => {
                 readyToDrive(false)
@@ -482,7 +495,7 @@ export default class Notification extends Component {
                     newRoute={this.state.routeIsAdded}
                     routeIsAdded={() => this.setState({ routeIsAdded: false })}
                 />
-            
+
             </Container>
         )
     }

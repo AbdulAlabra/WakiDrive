@@ -28,6 +28,7 @@ class VerifyPhoneNumber extends Component {
     sendAgain() {
         this.setState({ confirmResult: null, isConfirmed: false, isCodeSent: false, lebal: "+966 ", phoneNumber: "", message: "" });
     }
+    
     signIn() {
         const { phoneNumber } = this.state;
         if (phoneNumber.length < 9) {
@@ -38,27 +39,83 @@ class VerifyPhoneNumber extends Component {
             let phone = this.state.countryCode + phoneNumber;
             RNFirebase.auth().signInWithPhoneNumber(phone)
                 .then(confirmResult => {
-
                     this.setState({ confirmResult, message: 'Code has been sent!', isCodeSent: true, lebal: "Code " })
+
                     console.log(confirmResult)
 
                 })
                 .catch(error => this.setState({ message: false, warning: `Phone Number Error: ${error.message}` }));
         }
     };
-    confirmCode() {
-        const { codeInput, confirmResult } = this.state;
-        console.log(codeInput);
-        if (confirmResult && codeInput) {
-            confirmResult.confirm(codeInput)
-                .then((user) => {
-                    this.setState({ message: 'Code Confirmed!' });
-                    this.verified();
+
+    phoneNumberCode() {
+        const { phoneNumber } = this.state;
+        if (phoneNumber.length < 9) {
+            this.setState({ warning: "Too short phone number" })
+        }
+        else {
+            this.setState({ message: 'Sending code ...' });
+            let phone = this.state.countryCode + phoneNumber;
+            RNFirebase.auth().verifyPhoneNumber(phone)
+                .then(confirmResult => {
+                    console.log(confirmResult)
+                    let state = confirmResult.state
+
+                    if (state === "sent") {
+                        this.setState({ confirmResult: confirmResult.verificationId, message: 'Code has been sent!', isCodeSent: true, lebal: "Code " })
+                    }
+                    else {
+                        this.setState({ confirmResult: null, message: 'something is wrong.. please try again later', isCodeSent: false, lebal: "Phone " })
+
+                    }
 
                 })
-                .catch(error => this.setState({ message: `Code Confirm Error: ${error.message}` }));
+                .catch(error => this.setState({ message: false, warning: `Phone Number Error: ${error.message}` }));
+        }
+    }
+    phoneNumberConfirm() {
+        const { codeInput, confirmResult, phoneNumber, countryCode } = this.state;
+        console.log("code input : " + codeInput);
+        console.log()
+        if (confirmResult && codeInput) {
+            let phone = countryCode + phoneNumber
+            RNFirebase.auth().verifyPhoneNumber(phone).on("state_changed", (phoneAuth) => {
+                console.log(phoneAuth)
+                let state = phoneAuth.state
+                switch (state) {
+                    case "sent":
+                    //this.setState({ confirmResult: phoneAuth, message: 'Code has been sent!', isCodeSent: true, lebal: "Code " })
+
+                    default:
+                        break;
+                }
+            })
+                .then(confirmResult => {
+                    console.log(confirmResult)
+
+                })
+                .catch(err => {
+                    console.log(err);
+                })
+        }
+    }
+
+    confirmCode() {
+        const { codeInput, confirmResult } = this.state;
+        //console.log(codeInput);
+        if (confirmResult && codeInput) {
+             let credential = RNFirebase.auth.PhoneAuthProvider.credential(confirmResult, codeInput)
+             console.log(credential);
+            // confirmResult.confirm(codeInput)
+            //     .then((user) => {
+            //         this.setState({ message: 'Code Confirmed!' });
+            //         this.verified();
+
+            //     })
+            //     .catch(error => this.setState({ message: `Code Confirm Error: ${error.message}` }));
         }
     };
+
     verified() {
         console.log("phone number " + this.state.phoneNumber);
         localStorage.retrieveData("@driverID")
@@ -93,19 +150,23 @@ class VerifyPhoneNumber extends Component {
                 console.log(err);
             })
     }
+
+
     render() {
         const { isModalVisible, isConfirmed, phoneNumber, lebal, confirmResult, codeInput, warning, message, isCodeSent } = this.state
         let button = null;
         if (isCodeSent) {
             button = <Button full warning style={{ height: '10%', top: 100 }} onPress={() => {
-                this.confirmCode();
+                //this.confirmCode();
+                this.phoneNumberConfirm();
             }}>
                 <Text>Verify Now</Text>
             </Button>
         }
         else {
             button = <Button full info style={{ height: '10%', top: 100 }} onPress={() => {
-                this.signIn();
+                //this.signIn();
+                this.phoneNumberCode()
 
             }}>
                 <Text>Get Secuirty Code To Your Phone Now</Text>

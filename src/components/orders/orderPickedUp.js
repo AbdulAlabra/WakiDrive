@@ -4,7 +4,7 @@ import moment from 'moment-timezone'
 import localStorage from '../localStorage'
 
 const updateOrderStatus = (status) => {
-
+console.trace("Heeeeeeloooo picked up ");
     return localStorage.retrieveData("@order")
         .then(order => {
             let orderID = order.orderID

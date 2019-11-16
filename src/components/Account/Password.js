@@ -9,8 +9,6 @@ import LogIn from "./LogIn"
 
 import Loading from "../Loading"
 
-
-
 class Password extends Component {
     state = {
         email: "",

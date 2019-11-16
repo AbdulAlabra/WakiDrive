@@ -24,7 +24,7 @@ class Profile extends Component {
     }
     getUserInfo() {
         const user = firebase.auth().currentUser
-        console.log(user)
+        //console.log(user)
         const { displayName, email, emailVerified, phoneNumber } = user
         this.setState({ displayName, email, emailVerified, phoneNumber });
 

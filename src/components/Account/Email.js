@@ -41,10 +41,9 @@ class Email extends Component {
             }
         })
     }
-
     _toggleModal = () =>
         this.setState({ isModalVisible: !this.state.isModalVisible });
-
+        
     verified() {
         const email = firebase.auth().currentUser.email
 
@@ -232,6 +231,7 @@ class Email extends Component {
 
         );
     }
+
 }
 
 

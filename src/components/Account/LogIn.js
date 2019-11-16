@@ -28,7 +28,6 @@ class LogIn extends Component {
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
                 //logged in
-                console.log(user)
                 this.setState({ showProfile: true });
             }
             else {
@@ -80,7 +79,7 @@ class LogIn extends Component {
         const { hasAcount } = this.state
 
         if (hasAcount) {
-            message("You already have an account", "you cannot have more than two account.");
+            message("You already have an account", "you cannot have more than one account.");
         }
         else {
             this.setState({ signUp: true });
@@ -94,9 +93,9 @@ class LogIn extends Component {
 
     render() {
         const { signUp, forgotPassword, Loading, showProfile } = this.state
-        if (showProfile) {
-            return <Profile />
-        }
+        // if (showProfile) {
+        //     return <Profile />
+        // }
         if (Loading) {
             return <LoadingScreen />
         }

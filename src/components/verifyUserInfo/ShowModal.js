@@ -4,7 +4,7 @@ import PhoneNumber from './PhoneNumberVerify'
 import Email from "./Email"
 import Address from './Address'
 import isVerified from "./verifiyUser"
-
+import userInformation from "../Account/updatedUserInformation"
 import Payment from "./Payment"
 
 
@@ -22,14 +22,36 @@ class ShowModal extends Component {
     componentWillMount() {
         this.verify()
     }
+    setStatus(status) {
+        this.setState({ status })
+
+    }
     verify() {
-        isVerified().then(res => {
-            console.log("res " + res)
-            this.setState({ status: res })
-        })
-            .catch(err => {
-                console.log(err);
+        userInformation()
+            .then((user) => {
+                if (user) {
+
+
+                    const { address, phone, email_verified } = user.claims
+                    if (!phone) {
+                        this.setStatus("phone");
+                    }
+                    else if (!email_verified) {
+                        this.setStatus("email")
+                    }
+                    else if (!address) {
+                        this.setStatus("address")
+                    }
+                }
+                else {
+                    this.setState({ status: "" })
+                }
             })
+            .catch(err => {
+                console.log(err)
+                return false
+            })
+
     }
 
 
@@ -45,16 +67,19 @@ class ShowModal extends Component {
         else if (status === "email") {
             return <Email onComplete={() => this.verify()}
             />
-            //  <Email /> this should be like that
         }
         else if (status === "address") {
             return <Address onComplete={() => this.verify()} />
         }
-        else {
-
+        else if (status === "payment") {
             return <Payment />
         }
+        else {
+            return null
+        }
+
     }
+
     render() {
         return (
             <View>
@@ -62,6 +87,7 @@ class ShowModal extends Component {
             </View>
         );
     }
+
 }
 
 export default ShowModal

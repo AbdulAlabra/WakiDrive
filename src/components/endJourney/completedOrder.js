@@ -1,9 +1,9 @@
-import firebase from "../Firebase"
-import localStorage from "../localStorage"
+import firebase from "../Firebase";
+import localStorage from "../localStorage";
 import moment from 'moment-timezone';
-import updateLocalStorage from './updateLocalStorage'
-import updatePayment from '../payment/updatePayment'
-import updateDeliveryTracking from "../../request/delivery/updateOrderStatus"
+import updateLocalStorage from './updateLocalStorage';
+import updatePayment from '../payment/updatePayment';
+import updateDeliveryTracking from "../../request/delivery/updateOrderStatus";
 
 const db = firebase.database();
 
@@ -25,6 +25,7 @@ const addCompletedOrder = (driverID, assignedAt, orderRefrence, orderID) => {
             return updateTotalMoeny(driverID)
                 .then(isDone => {
                     if (isDone) {
+                        removeDriveingNow(driverID)
                         return removeOrderLisner(driverID, orderID)
                             .then(() => {
                                 return updatePayment()
@@ -84,21 +85,16 @@ const updateTotalMoeny = (driverID) => {
 }
 
 const orderDetails = () => {
+    const driverID = firebase.auth().currentUser.uid
+
     return localStorage.retrieveData('@order')
         .then(order => {
             let orderRefrence = order.orderRef;
             let assignedAt = order.assignedAt;
             let orderID = order.orderID;
-
-            return localStorage.retrieveData('@driverID')
-                .then(driverID => {
-                    tracker(orderRefrence, driverID, "delivered")
-                    return addCompletedOrder(driverID, assignedAt, orderRefrence, orderID)
-                })
-                .catch(err => {
-                    console.log(err)
-                    return false
-                })
+            let destenation = order.buyerLocation;
+            tracker(orderRefrence, driverID, "delivered", destenation);
+            return addCompletedOrder(driverID, assignedAt, orderRefrence, orderID)
         })
         .catch(err => {
             console.log(err)
@@ -118,16 +114,29 @@ const removeOrderLisner = (driverID, orderID) => {
         })
 }
 
-const tracker = (orderRefrence, driverID, opreation) => {
+const removeDriveingNow = (driverID) => {
+    db.ref(`drivers/drivingNow/${driverID}`).remove()
+        .then(() => {
+            console.log("driver is removed from driving now")
+            return true
+        })
+        .catch(err => {
+            console.log(err)
+            return false
+        })
+}
+const tracker = (orderRefrence, driverID, opreation, destenation) => {
     navigator.geolocation.getCurrentPosition(position => {
         let location = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
         }
         let latlang = `${location.latitude},${location.longitude}`
+        let destenationLatlang = `${destenation.latitude},${destenation.longitude}`
 
-        return updateDeliveryTracking(orderRefrence, driverID, opreation, latlang)
+        return updateDeliveryTracking(orderRefrence, driverID, opreation, latlang, destenationLatlang)
     }, err => console.log(err), { maximumAge: 0, enableHighAccuracy: true })
 }
+
 
 export default orderDetails

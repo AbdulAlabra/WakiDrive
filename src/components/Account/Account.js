@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Form, Item, Text, Input, Label, Button, Title, Subtitle, button } from 'native-base';
 import { StyleSheet, View, } from "react-native"
-
 import ValidateForm from "../FormValidatiom"
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Loading from "../Loading"
@@ -14,8 +13,6 @@ import LogIn from "./LogIn"
 import localStorage from "../localStorage"
 
 
-
-
 class SignUpForm extends Component {
     state = {
         email: "",
@@ -23,17 +20,11 @@ class SignUpForm extends Component {
         firstName: "",
         lastName: "",
         phone: "",
-        contryCode: "+966",
         userId: false,
         isModalVisible: false,
         logIn: false,
         fetching: false
     };
-
-    componentWillMount() {
-
-    }
-    
 
     signUserUp() {
         const { firstName, lastName, phone, email, password } = this.state;
@@ -42,7 +33,6 @@ class SignUpForm extends Component {
         if (isValid) {
             this.setState({ fetching: true });
             Auth(email, password, "signup", (user) => {
-
                 if (user) {
                     console.log("SUCCESS");
                     this.addUser()
@@ -63,7 +53,7 @@ class SignUpForm extends Component {
             firstName: "",
             lastName: "",
             phone: "",
-            contryCode: "+966",
+
             acctStatus: "",
             userId: false,
             isModalVisible: false,
@@ -82,16 +72,28 @@ class SignUpForm extends Component {
             userToken.then(token => {
                 AddDriver(firstName, lastName, phone, email, password, fcm, token)
                     .then(res => {
-                    let message = res.message !== undefined? res.message : "Please try again later";
+                        let message = res.message !== undefined ? res.message : "Please try again later";
                         if (res.status === "ADDED") {
-                            console.log("user is added");
                             localStorage.storeData("@email", email);
-                            localStorage.storeData("@phone", phone);
-                            this.clear()
+                            //localStorage.storeData("@phone", phone);
+
+                            const user = firebase.auth().currentUser
+                            let displayName = `${firstName} ${lastName}`
+                            // user.updatePhoneNumber()
+                            user.updateProfile({
+                                displayName: displayName,
+                                photoURL: "no photo",
+                            })
+                                .then(() => {
+                                    this.clear()
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                })
+
                         }
                         else {
                             message("Somthing Went Wrong", message);
-
                         }
                     })
                     .catch(err => {
@@ -106,6 +108,7 @@ class SignUpForm extends Component {
                 console.log(err)
             })
     }
+
     render() {
         const { fetching, logIn, firstName, lastName, phone, email, password, userId } = this.state;
 
