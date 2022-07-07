@@ -11,7 +11,7 @@
     "@react-native-community/async-storage": "^1.2.1",
     "firebase": "^5.9.0",
     "geolib": "^2.0.24",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.23",
     "native-base": "^2.12.1",
     "paytabs_api": "^1.0.0",
